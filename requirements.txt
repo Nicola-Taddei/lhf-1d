@@ -1,0 +1,9 @@
+# --- Numerical ---
+numpy>=1.26
+jax[cuda12]>=0.4.26
+jaxlib>=0.4.26
+flax>=0.8.0
+optax>=0.2.3
+
+# --- Plotting ---
+matplotlib>=3.8
