@@ -10,7 +10,11 @@ Activate environment
 ```bash
 source venv/bin/activate
 ```
-Install the required packages
+Install the required packages: from root
 ```bash
 pip install -r requirements.txt
+```
+Install ```lhf``` package in editable mode: from root
+```bash
+pip install -e .
 ```
