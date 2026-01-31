@@ -7,10 +7,6 @@ import flax.linen as nn
 from flax import struct
 import numpy as np
 
-@dataclass
-class VAEParams:
-    features: Sequence[int]
-
 class MLP(nn.Module):
     features: Tuple[int, ...]
     output_dim: int
@@ -167,9 +163,8 @@ class ConditionalVAE:
     def d_kl(
         self,
         params: Any,
-        x: jnp.ndarray,
-        ref_gen_model: Any,      # kept for interface compatibility
         ref_params: Any,
+        x: jnp.ndarray,
         key: jax.Array,
         *,
         sigma_y: float,
@@ -182,7 +177,7 @@ class ConditionalVAE:
         z = jax.random.normal(key, (B, self.d_z))
 
         mu_y = self._decode(params["decoder"], x, z)
-        ref_mu_y = ref_gen_model._decode(
+        ref_mu_y = self._decode(
             ref_params["decoder"], x, z
         )
 

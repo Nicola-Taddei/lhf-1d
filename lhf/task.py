@@ -12,7 +12,7 @@ class TaskParams:
     gamma: float
 
 def manifold(x, y1, alpha, beta, gamma):
-    return x + gamma*x**2 + alpha*y1 + beta*y1**2
+    return (gamma*x + beta) * y1**2 + alpha*y1
 
 def sample_manifold(key, x, alpha, beta, gamma):
     B = x.shape[0]
@@ -55,7 +55,7 @@ def logpdf_labels(x, y, alpha, beta, gamma, tau):
         gamma,
     )               # (B, m)
 
-    u_mean = jnp.mean(u, axis=1, keepdims=True)  # (B,)
+    u_mean = jnp.mean(u, axis=1, keepdims=True)  # (B, 1)
 
     deltas = u - u_mean                          # (B, m)
     logits = deltas / tau                        # (B, m)
@@ -95,7 +95,9 @@ class ManifoldVisualizer:
         ys,
         base_manifold=None,
         target_manifold=None,
+        learned_manifold=None,
         labels=None,
+        scale="fixed"
     ):
         """
         Args:
@@ -172,11 +174,34 @@ class ManifoldVisualizer:
                 label="target manifold",
             )
 
+        if learned_manifold is not None:
+            y2_learned = jnp.squeeze(
+                learned_manifold(
+                    jnp.broadcast_to(
+                        x[None, None, None],
+                        y1_grid[None,...,None].shape
+                    ),
+                    y1_grid[None,...,None]
+                )
+            )
+            print("y2_learned.shape = ", y2_learned.shape)
+            print("y2_learned[190:210] = ", y2_learned[190:210])
+            ax.plot(
+                y1_grid,
+                y2_learned,
+                color="orange",
+                linewidth=2.0,
+                label="learned manifold",
+            )
+
         # -------------------------------------------------
         # Formatting
         # -------------------------------------------------
-        ax.set_xlim(self.xlim)
-        ax.set_ylim(self.ylim)
+        if scale == "fixed":
+            ax.set_xlim(self.xlim)
+            ax.set_ylim(self.ylim)
+        else:
+            ax.set_xlim(self.xlim)
         ax.set_xlabel(r"$y_1$")
         ax.set_ylabel(r"$y_2$")
         ax.set_title(rf"$y \sim p(y \mid x={x:.3f})$")

@@ -8,7 +8,10 @@ from .task import (
 )
 
 from .vae import(
-    VAEParams,
     ConditionalVAE,
     MLP
+)
+
+from .preferences import(
+    PrefModel
 )
