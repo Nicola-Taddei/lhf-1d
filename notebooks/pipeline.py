@@ -376,6 +376,13 @@ aligned_vae_params = vae_params
 
 #y2_fn = lambda x, y: y2_learned(pref_params["y2_fn"], x, y) / (jax.nn.softplus(pref_params["log_tau"]) + 1e-6)
 y2_fn = lambda x, y: y2_learned(pref_params["y2_fn"], x, y)
+""" y2_fn = lambda x, y1: manifold(
+    x,
+    y1,
+    target_p.alpha,
+    target_p.beta,
+    target_p.gamma,
+) """
 
 def avg_u(params, key, x, sigma_y):
     y = model.sample(
@@ -389,7 +396,7 @@ def avg_u(params, key, x, sigma_y):
     y1 = y[:, None, 0][...,None]
     y2 = y[:, None, 1][...,None]
     y2_hat = y2_fn(x[:, None, :], y1)
-    u = -(y2 - y2_hat)*2
+    u = -(y2 - y2_hat)**2
 
     return jnp.mean(u)
 
@@ -554,7 +561,7 @@ task_vis.visualize(
     target_manifold=target_p,
     learned_manifold=y2_fn,
     labels=gt_new_labels[0],
-    #scale="free"
+    scale="free"
 )
 
 # %%

@@ -23,7 +23,7 @@ class PrefModel:
         y1 = y[:,:,0][..., None]
         y2 = y[:,:,1][..., None]
         y2_hat = self.y2_fn(params["y2_fn"], x, y1)
-        u = -(y2 - y2_hat)*2
+        u = -(y2 - y2_hat)**2
         u_mean = jnp.mean(u, axis=1)
         delta_u = u - u_mean[..., None]
         if tau is None:
