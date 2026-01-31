@@ -109,7 +109,7 @@ class ManifoldVisualizer:
         """
         ys = np.asarray(ys)
 
-        fig, ax = plt.subplots(figsize=(5, 5))
+        fig, ax = plt.subplots(figsize=(5, 5), dpi=200)
 
         # -------------------------------------------------
         # Plot sampled points
