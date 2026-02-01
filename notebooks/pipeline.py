@@ -32,8 +32,8 @@ task_vis = ManifoldVisualizer(ylim=(-1,5))
 
 
 # %% Create data
-#n = 10000
-n = 256
+n_queries = 1024 #256
+n_internal = 10000
 m = 50
 tau = 1.0
 
@@ -44,10 +44,10 @@ tau = 1.0
     l_key
 ) = jax.random.split(key, 4)
 
-x = jax.random.uniform(x_key, shape=(n,1), minval=-1, maxval=1)
+x = jax.random.uniform(x_key, shape=(n_internal,1), minval=-1, maxval=1)
 xs = jnp.broadcast_to(
     x[:,None,:],
-    (n, m, 1)
+    (n_internal, m, 1)
 )   # (B,m,1)
 vmapped_sample_manifold = jax.vmap(
     sample_manifold,
@@ -92,6 +92,8 @@ num_iter = 10
 # Logging:
 gt_u_history = []
 y_history = []
+ys_tot = None
+l_tot = None
 l_history = []
 
 # Step 1: Pre-training
@@ -239,7 +241,7 @@ align_batch_dim = 256
 align_epochs = 1000
 
 #beta = 0.01
-beta = 0.001
+beta = 0.01
 
 def avg_u(params, key, x, sigma_y):
     y = gen_model.sample(
@@ -302,7 +304,6 @@ vmapped_vae_sample = jax.vmap(
     out_axes=1
 )
 
-
 # %% Training loop: Iterations
 
 for iter in range(num_iter):
@@ -333,10 +334,12 @@ for iter in range(num_iter):
     plt.show()
 
     ys = sample_many(vae_params, ys_key, xs[:,0], m)
+    ys_query = ys[:n_queries]
+    y_history.append(ys_query)   # ys for queries
 
     logits = logpdf_labels(
-        xs,
-        ys,
+        xs[:n_queries],
+        ys_query,
         alpha=target_p.alpha,
         beta=target_p.beta,
         gamma=target_p.gamma,
@@ -348,6 +351,27 @@ for iter in range(num_iter):
         logits,
         axis=-1,
     )
+
+    l_history.append(labels)   # labels used for queries
+    if ys_tot is None:
+        ys_tot = ys_query
+        l_tot = labels
+        xs_tot = xs[:n_queries]
+    else:
+        ys_tot = jnp.concatenate([ys_tot, ys_query], axis=0)
+        l_tot = jnp.concatenate([l_tot, labels], axis=0)
+        xs_tot = jnp.concatenate([xs_tot, xs[:n_queries]], axis=0)
+
+    u = utility_vmapped(
+        xs,
+        ys,
+        target_p.alpha,
+        target_p.beta,
+        target_p.gamma,
+    )
+
+    mean_u = jnp.mean(u)
+    gt_u_history.append(mean_u)
 
     task_vis.visualize(
         xs[0, 0, 0],
@@ -364,13 +388,24 @@ for iter in range(num_iter):
 
     loss_history = []
 
+    n_tot = xs_tot.shape[0]
     for step in range(pref_train_epochs):
+        key, subkey = jax.random.split(key)
+        idx = jax.random.randint(
+            subkey,
+            (pref_batch_dim,),
+            minval=0,
+            maxval=n_tot
+        )
+        xs_batch = xs_tot[idx]
+        ys_batch = ys_tot[idx]
+        l_batch = l_tot[idx]
         pref_params, opt_state, loss = pref_train_step(
             pref_params,
             opt_state,
-            xs,        # (B, m, 1)
-            ys,        # (B, m, 2)
-            labels,   # (B, m)
+            xs_batch,        # (pref_batch_dim, m, 1)
+            ys_batch,        # (pref_batch_dim, m, 2)
+            l_batch,   # (pref_batch_dim, m)
         )
 
         loss_val = float(loss)
@@ -467,7 +502,7 @@ for iter in range(num_iter):
             vae_params,
             opt_state,
             subkey,
-            xs[:,0],        # (B, m, 1)
+            xs[:,0],        # (B, 1)
             sigma_y_T
         )
 
@@ -570,5 +605,82 @@ for iter in range(num_iter):
         labels=gt_new_labels[0],
         #scale="free"
     )
+
+# %% Retrieve VAE from from data
+
+# Step 1: Pre-training
+opt = optax.adam(pre_train_lr)
+opt_state = opt.init(vae_params)
+
+loss_history = []
+
+for step in range(pre_train_epochs):
+    key, subkey = jax.random.split(key)
+    vae_params, opt_state, loss = pre_train_step(
+        vae_params, step, opt_state, subkey, xs[:,0], ys[:,0]
+    )
+    loss_val = float(loss)          # convert from JAX scalar
+    loss_history.append(loss_val)
+
+    print(f"[{step+1}/{pre_train_epochs}] -ELBO = {loss_val}")
+
+# Plot loss
+plt.figure(figsize=(5, 3), dpi=200)
+plt.plot(loss_history)
+plt.xlabel("Training step")
+plt.ylabel("-ELBO")
+plt.title("VAE training loss")
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
+ys = sample_many(vae_params, ys_key, xs[:,0], m)
+y_history.append(ys)   # used for queries
+
+u = utility_vmapped(
+    xs,
+    ys,
+    target_p.alpha,
+    target_p.beta,
+    target_p.gamma,
+)
+
+mean_u = jnp.mean(u)
+gt_u_history.append(mean_u)
+
+logits = logpdf_labels(
+    xs,
+    ys,
+    alpha=target_p.alpha,
+    beta=target_p.beta,
+    gamma=target_p.gamma,
+    tau=tau,
+)
+
+labels = jax.random.categorical(
+    l_key,
+    logits,
+    axis=-1,
+)
+
+l_history.append(labels)   # labels used for queries
+
+task_vis.visualize(
+    xs[0, 0, 0],
+    ys[0],
+    base_manifold=base_p,
+    target_manifold=target_p,
+    labels=labels[0],
+)
+
+# %% Plot ground truth utility
+plt.figure(figsize=(5, 3), dpi=200)
+plt.plot(gt_u_history)
+plt.xlabel("Iteration")
+plt.ylabel("u")
+plt.title("Utility vs iteration")
+plt.grid(True)
+plt.tight_layout()
+plt.show()
 
 # %%

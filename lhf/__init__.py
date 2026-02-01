@@ -3,6 +3,7 @@ from .task import (
     manifold,
     sample_manifold,
     utility,
+    utility_vmapped,
     logpdf_labels,
     ManifoldVisualizer
 )

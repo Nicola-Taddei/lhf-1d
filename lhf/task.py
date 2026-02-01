@@ -35,18 +35,18 @@ def utility(x, y, alpha, beta, gamma):
     y2_hat = manifold(x, y1, alpha, beta, gamma)
     return jnp.squeeze(-(y2 - y2_hat)**2, axis=1)
 
+utility_vmapped = jax.vmap(
+    utility,
+    in_axes=(1, 1, None, None, None),  # map over m
+    out_axes=1,
+)
+
 def logpdf_labels(x, y, alpha, beta, gamma, tau):
     """
     x: (B, m, 1)
     y: (B, m, 2)
     return: (B,m,2)
     """
-    utility_vmapped = jax.vmap(
-        utility,
-        in_axes=(1, 1, None, None, None),  # map over m
-        out_axes=1,
-    )
-
     u = utility_vmapped(
         x,          # (B, m, 1)
         y,          # (B, m, 2)
