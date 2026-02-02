@@ -4,6 +4,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 
 @dataclass
 class TaskParams:
@@ -184,8 +185,6 @@ class ManifoldVisualizer:
                     y1_grid[None,...,None]
                 )
             )
-            print("y2_learned.shape = ", y2_learned.shape)
-            print("y2_learned[190:210] = ", y2_learned[190:210])
             ax.plot(
                 y1_grid,
                 y2_learned,
@@ -206,6 +205,36 @@ class ManifoldVisualizer:
         ax.set_ylabel(r"$y_2$")
         ax.set_title(rf"$y \sim p(y \mid x={x:.3f})$")
         ax.grid(True)
-        ax.legend()
+        #ax.legend()
+        handles, labels_legend = ax.get_legend_handles_labels()
+
+        # Add proxy artists only if labels were provided
+        if labels is not None:
+            proxy_handles = [
+                Line2D(
+                    [0], [0],
+                    marker="o",
+                    linestyle="None",
+                    markerfacecolor="green",
+                    markeredgecolor="none",
+                    markersize=8,
+                    alpha=0.8,
+                    label="Liked samples",
+                ),
+                Line2D(
+                    [0], [0],
+                    marker="o",
+                    linestyle="None",
+                    markerfacecolor="red",
+                    markeredgecolor="none",
+                    markersize=8,
+                    alpha=0.8,
+                    label="Disliked samples",
+                ),
+            ]
+
+            handles += proxy_handles
+
+        ax.legend(handles=handles, loc="best")
 
         plt.show()

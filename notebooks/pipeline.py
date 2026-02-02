@@ -9,33 +9,38 @@ import numpy as np
 import matplotlib.pyplot as plt
 import optax
 from flax.nnx import split, merge
+import yaml
+from pathlib import Path
 
 from lhf import *
 
-seed = 42
-key = jax.random.PRNGKey(seed)
+path = Path("../configs/config.yaml")
+with path.open("r") as f:
+    config = yaml.safe_load(f)
+
+key = jax.random.PRNGKey(config["seed"])
 
 # %% Task
 base_p = TaskParams(
-    alpha = 0.3,
-    beta = 0.2,
-    gamma = 1.0
+    alpha = config["base_manifold"]["alpha"],
+    beta = config["base_manifold"]["beta"],
+    gamma = config["base_manifold"]["gamma"]
 )
 
 target_p = TaskParams(
-    alpha = 0.3,
-    beta = 2.0,
-    gamma = 0.0
+    alpha = config["target_manifold"]["alpha"],
+    beta = config["target_manifold"]["beta"],
+    gamma = config["target_manifold"]["gamma"]
 )
 
 task_vis = ManifoldVisualizer(ylim=(-1,5))
 
 
 # %% Create data
-n_queries = 1024 #256
-n_internal = 10000
-m = 50
-tau = 1.0
+n_queries = config["n_queries"]
+n_internal = config["n_internal"]
+m = config["m"]
+tau = config["tau"]
 
 (
     key,
@@ -87,21 +92,22 @@ task_vis.visualize(
 
 # %% Training loop: Initialization
 
-num_iter = 10
+num_iter = config["num_iter"]
 
 # Logging:
 gt_u_history = []
 y_history = []
 ys_tot = None
+x_tot = None
 l_tot = None
 l_history = []
 
 # Step 1: Pre-training
-pre_train_epochs = 2000
-pre_train_lr = 1e-3
-pre_train_batch_dim = 256
-sigma_y_0 = 1.5
-sigma_y_T = 0.05
+pre_train_epochs = config["pre_train_epochs"]
+pre_train_lr = config["pre_train_lr"]
+pre_train_batch_dim = config["pre_train_batch_dim"]
+sigma_y_0 = config["sigma_y_0"]
+sigma_y_T = config["sigma_y_T"]
 
 (
     key,
@@ -111,10 +117,10 @@ sigma_y_T = 0.05
     ys_key
 ) = jax.random.split(key, 5)
 
-pre_train_features = [256, 256]
+pre_train_features = config["pre_train_features"]
 pre_train_n_features = len(pre_train_features)
-d_z=1
-d_y=2
+d_z=config["d_z"]
+d_y=config["d_y"]
 
 encoder_mlp = MLP(
     features=pre_train_features,
@@ -132,8 +138,8 @@ decoder_mlp = MLP(
 gen_model = ConditionalVAE(
     encoder=encoder_mlp,
     decoder=decoder_mlp,
-    d_z=1,
-    d_y=2
+    d_z=d_z,
+    d_y=d_y
 )
 x_batch = xs[:pre_train_batch_dim,0]  # (B,1)
 y_batch = ys[:pre_train_batch_dim,0]  # (B,2)
@@ -184,9 +190,9 @@ def sample_many(params, key, x, m):
     )(keys)
 
 # Step 2: Learn preference model
-pref_lr = 1e-3
-pref_batch_dim = 256
-pref_train_epochs = 1000
+pref_lr = config["pref_lr"]
+pref_batch_dim = config["pref_batch_dim"]
+pref_train_epochs = config["pref_train_epochs"]
 
 (
     key,
@@ -196,7 +202,7 @@ pref_train_epochs = 1000
 ) = jax.random.split(key, 4)
 
 mlp = MLP(
-    features=[256, 256],
+    features=config["pref_model_features"],
     output_dim=1
 )
 
@@ -236,14 +242,12 @@ def pref_train_step(params, opt_state, x, y, labels):
     return params, opt_state, loss
 
 # Step 3: Improve VAE
-align_lr = 1e-3
-align_batch_dim = 256
-align_epochs = 1000
+align_lr = config["align_lr"]
+align_batch_dim = config["align_batch_dim"]
+align_epochs = config["align_epochs"]
+beta = config["beta"]
 
-#beta = 0.01
-beta = 0.01
-
-def avg_u(params, key, x, sigma_y):
+def avg_u(params, y2_fn, key, x, sigma_y):
     y = gen_model.sample(
         params,
         x,
@@ -259,7 +263,7 @@ def avg_u(params, key, x, sigma_y):
 
     return jnp.mean(u)
 
-def kl_div(params, key, x, sigma_y):
+def kl_div(params, base_vae_params, key, x, sigma_y):
     kl = gen_model.d_kl(
         params,
         base_vae_params,
@@ -270,15 +274,17 @@ def kl_div(params, key, x, sigma_y):
 
     return jnp.mean(kl)
 
-def align_loss(params, key, x, sigma_y):
+def align_loss(params, base_vae_params,y2_fn,  key, x, sigma_y):
     u_bar = avg_u(
         params,
+        y2_fn,
         key, 
         x,
         sigma_y
     )
     kl = kl_div(
         params,
+        base_vae_params,
         key,
         x,
         sigma_y
@@ -286,10 +292,12 @@ def align_loss(params, key, x, sigma_y):
     
     return -u_bar + beta * kl
 
-@jax.jit
-def align_train_step(params, opt_state, key, x, sigma_y):
+#@jax.jit
+def align_train_step(params, base_vae_params, y2_fn, opt_state, key, x, sigma_y):
     loss, grads = jax.value_and_grad(align_loss)(
         params,
+        base_vae_params,
+        y2_fn,
         key,
         x,
         sigma_y
@@ -338,28 +346,28 @@ for iter in range(num_iter):
     y_history.append(ys_query)   # ys for queries
 
     logits = logpdf_labels(
-        xs[:n_queries],
-        ys_query,
+        xs,
+        ys,
         alpha=target_p.alpha,
         beta=target_p.beta,
         gamma=target_p.gamma,
         tau=tau,
     )
-
-    labels = jax.random.categorical(
+    gt_labels = jax.random.categorical(
         l_key,
         logits,
         axis=-1,
     )
+    ls = gt_labels[:n_queries]
+    l_history.append(ls)   # labels used for queries
 
-    l_history.append(labels)   # labels used for queries
     if ys_tot is None:
         ys_tot = ys_query
-        l_tot = labels
+        l_tot = ls
         xs_tot = xs[:n_queries]
     else:
         ys_tot = jnp.concatenate([ys_tot, ys_query], axis=0)
-        l_tot = jnp.concatenate([l_tot, labels], axis=0)
+        l_tot = jnp.concatenate([l_tot, ls], axis=0)
         xs_tot = jnp.concatenate([xs_tot, xs[:n_queries]], axis=0)
 
     u = utility_vmapped(
@@ -378,7 +386,7 @@ for iter in range(num_iter):
         ys[0],
         base_manifold=base_p,
         target_manifold=target_p,
-        labels=labels[0],
+        labels=gt_labels[0],
     )
 
 
@@ -432,7 +440,7 @@ for iter in range(num_iter):
 
     pred_labels = jax.random.categorical(
         l_key,
-        logits,
+        pred_logits,
         axis=-1,
     )
 
@@ -447,14 +455,14 @@ for iter in range(num_iter):
 
     gt_new_labels = jax.random.categorical(
         gt_l_key,
-        logits,
+        gt_logits,
         axis=-1,
     )
 
-    acc_gt = jnp.mean(gt_new_labels == labels)
-    acc_learned = jnp.mean(pred_labels == labels)
+    acc_gt = jnp.mean(gt_new_labels == gt_labels)
+    acc_learned = jnp.mean(pred_labels == gt_labels)
 
-    perc_likes = jnp.mean(labels == 1)
+    perc_likes = jnp.mean(gt_labels == 1)
 
     print(f"Dataset composition (likes/dislikes):   {perc_likes} / {1 - perc_likes}")
 
@@ -469,7 +477,7 @@ for iter in range(num_iter):
         base_manifold=base_p,
         target_manifold=target_p,
         learned_manifold=y2_fn,
-        labels=labels[0],
+        labels=gt_labels[0],
         #scale="free"
     )
 
@@ -477,7 +485,6 @@ for iter in range(num_iter):
     # Step 3: Improve VAE
 
     base_vae_params = jax.lax.stop_gradient(vae_params)
-    vae_params = vae_params
 
     #y2_fn = lambda x, y: y2_learned(pref_params["y2_fn"], x, y) / (jax.nn.softplus(pref_params["log_tau"]) + 1e-6)
     y2_fn = lambda x, y: y2_learned(pref_params["y2_fn"], x, y)
@@ -500,6 +507,8 @@ for iter in range(num_iter):
         key, subkey = jax.random.split(key, 2)
         vae_params, opt_state, loss = align_train_step(
             vae_params,
+            base_vae_params,
+            y2_fn,
             opt_state,
             subkey,
             xs[:,0],        # (B, 1)
@@ -510,6 +519,7 @@ for iter in range(num_iter):
         u_val = float(
             avg_u(
                 vae_params,
+                y2_fn,
                 key,
                 xs[:,0],
                 sigma_y_T
@@ -518,6 +528,7 @@ for iter in range(num_iter):
         kl_val = float(
             kl_div(
                 vae_params,
+                base_vae_params,
                 key,
                 xs[:,0],
                 sigma_y_T
@@ -587,12 +598,6 @@ for iter in range(num_iter):
         axis=-1,
     )
 
-    perc_likes = jnp.mean(gt_new_labels == 1)
-
-    print(f"Dataset composition (likes/dislikes):   {perc_likes} / {1 - perc_likes}")
-
-    print(f"ACC(learned vs GT):   {acc_learned} / {acc_gt}")
-
     #y2_fn = lambda x, y: y2_learned(pref_params["y2_fn"], x, y) / (jax.nn.softplus(pref_params["log_tau"]) + 1e-6)
     y2_fn = lambda x, y: y2_learned(pref_params["y2_fn"], x, y)
 
@@ -635,7 +640,6 @@ plt.tight_layout()
 plt.show()
 
 ys = sample_many(vae_params, ys_key, xs[:,0], m)
-y_history.append(ys)   # used for queries
 
 u = utility_vmapped(
     xs,
