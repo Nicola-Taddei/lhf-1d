@@ -5,22 +5,22 @@ base_manifold:
   beta: 0.2
   gamma: 1.0
 target_manifold:
-  alpha: 0.3
-  beta: 2.0
-  gamma: 0.0
+  alpha: 4.0
+  beta: 4
+  gamma: 1.0
 
-n_queries: 256
+n_queries: 64 #256
 n_internal: 10000
-m: 50
+m: 10
 tau: 1.0
 
-num_iter: 10
+num_iter: 5
 
 pre_train_epochs: 2000
 pre_train_lr: 1.0e-3
 pre_train_batch_dim: 256
 sigma_y_0: 1.5
-sigma_y_T: 0.05
+sigma_y_T: 0.1 #0.05
 
 pre_train_features:
   - 256
@@ -30,7 +30,7 @@ d_y: 2
 
 pref_lr: 1.0e-3
 pref_batch_dim: 256
-pref_train_epochs: 1000
+pref_train_epochs: 2000 #1000
 
 pref_model_features:
   - 256

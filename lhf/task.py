@@ -153,7 +153,7 @@ class ManifoldVisualizer:
                 y2_base,
                 color="blue",
                 linewidth=2.0,
-                label="base manifold",
+                label="supp(p_data)",
             )
 
         # -------------------------------------------------
@@ -172,7 +172,7 @@ class ManifoldVisualizer:
                 y2_target,
                 color="pink",
                 linewidth=2.0,
-                label="target manifold",
+                label="supp(p_preference)",
             )
 
         if learned_manifold is not None:
@@ -219,7 +219,7 @@ class ManifoldVisualizer:
                     markeredgecolor="none",
                     markersize=8,
                     alpha=0.8,
-                    label="Liked samples",
+                    label="liked samples",
                 ),
                 Line2D(
                     [0], [0],
@@ -229,7 +229,7 @@ class ManifoldVisualizer:
                     markeredgecolor="none",
                     markersize=8,
                     alpha=0.8,
-                    label="Disliked samples",
+                    label="disliked samples",
                 ),
             ]
 
