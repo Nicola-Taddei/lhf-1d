@@ -16,3 +16,5 @@ from .vae import(
 from .preferences import(
     PrefModel
 )
+
+from .logging import Logger

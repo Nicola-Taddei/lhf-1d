@@ -18,6 +18,11 @@ path = Path("../configs/config.yaml")
 with path.open("r") as f:
     config = yaml.safe_load(f)
 
+logger = Logger(
+    log_dir="../logs/new_run",
+    config=config
+)
+
 key = jax.random.PRNGKey(config["seed"])
 
 # %% Task
@@ -54,6 +59,9 @@ xs = jnp.broadcast_to(
     x[:,None,:],
     (n_internal, m, 1)
 )   # (B,m,1)
+
+logger.log_data(np.array(xs), "xs.npy")
+
 vmapped_sample_manifold = jax.vmap(
     sample_manifold,
     in_axes=(0,1,None,None,None),
@@ -67,6 +75,7 @@ ys = vmapped_sample_manifold(
     base_p.beta,
     base_p.gamma,
 )   # (B,m,2)
+
 gt_logits = logpdf_labels(
     xs,
     ys,
@@ -81,6 +90,7 @@ gt_labels = jax.random.categorical(
     gt_logits,
     axis=-1
 )
+
 task_vis.visualize(
     xs[0,0,0],
     ys[0],
@@ -157,6 +167,7 @@ vae_params = {
     "encoder": encoder_mlp.init(init_key, xy_batch),
     "decoder": decoder_mlp.init(init_key, xz_batch)
 }
+logger.log_data(vae_params, "base/vae_params.npz")
 
 def pre_train_loss_fn(params, step, key, x, y):
         return -jnp.mean(
@@ -210,6 +221,7 @@ init_batch = jnp.zeros((pref_batch_dim, m, 2))
 pref_params = {
     "y2_fn": mlp.init(init_key, init_batch),
 }
+logger.log_data(pref_params, "base/pref_params.npz")
 
 y2_learned = lambda p, x, y1: mlp.apply(p, jnp.concatenate([x,y1], axis=2))
 
@@ -315,6 +327,7 @@ vmapped_vae_sample = jax.vmap(
 # %% Training loop: Iterations
 
 for iter in range(num_iter):
+    log_folder = Path(f"iter_{iter}")
     # Step 1: Pre-training
     opt = optax.adam(pre_train_lr)
     opt_state = opt.init(vae_params)
@@ -330,6 +343,8 @@ for iter in range(num_iter):
         loss_history.append(loss_val)
 
         print(f"[{step+1}/{pre_train_epochs}] -ELBO = {loss_val}")
+
+    logger.log_data(vae_params, log_folder / "vae_params.npz")
 
     # Plot loss
     plt.figure(figsize=(5, 3), dpi=200)
@@ -420,6 +435,8 @@ for iter in range(num_iter):
         loss_history.append(loss_val)
 
         print(f"[{step+1}/{pref_train_epochs}] NLL = {loss_val:.4f}")
+
+    logger.log_data(pref_params, log_folder / "pref_params.npz")
 
     # Plot loss
     plt.figure(figsize=(5, 3), dpi=200)
@@ -540,6 +557,8 @@ for iter in range(num_iter):
 
         print(f"[{step+1}/{pref_train_epochs}] loss = {loss_val:.4f}")
 
+    logger.log_data(vae_params, log_folder / "improved_vae_params.npz")
+
     # Plot loss
     plt.figure(figsize=(5, 3), dpi=200)
     plt.plot(loss_history)
@@ -628,6 +647,8 @@ for step in range(pre_train_epochs):
     loss_history.append(loss_val)
 
     print(f"[{step+1}/{pre_train_epochs}] -ELBO = {loss_val}")
+
+logger.log_data(vae_params, Path("final") / "vae_params.npz")
 
 # Plot loss
 plt.figure(figsize=(5, 3), dpi=200)

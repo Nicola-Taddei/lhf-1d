@@ -14,7 +14,7 @@ n_internal: 10000
 m: 10
 tau: 1.0
 
-num_iter: 5
+num_iter: 1
 
 pre_train_epochs: 2000
 pre_train_lr: 1.0e-3
