@@ -186,3 +186,42 @@ class ConditionalVAE:
         kl = 0.5 * jnp.sum(resid**2, axis=-1) / (sigma_y**2)
 
         return kl
+    
+    def dispersion(
+        self,
+        params: Any,
+        x: jnp.ndarray,
+        key: jax.Array,
+        *,
+        n_z: int = 8,
+    ) -> jnp.ndarray:
+        """
+        Monte Carlo estimate of
+            sum_b tr(Cov_z(mu_y(x_b, z)))
+
+        This penalizes collapse of the decoder mean to a single point
+        while allowing low-dimensional manifolds.
+        """
+
+        B = x.shape[0]
+
+        # Sample latent variables: (n_z, B, d_z)
+        z = jax.random.normal(key, (n_z, B, self.d_z))
+
+        # Decode: (n_z, B, d_y)
+        def decode_fn(z_i):
+            return self._decode(params["decoder"], x, z_i)
+
+        mu_y = jax.vmap(decode_fn)(z)
+
+        # Mean over z: (B, d_y)
+        mu_y_mean = jnp.mean(mu_y, axis=0)
+
+        # Squared deviations: (n_z, B, d_y)
+        sq_dev = (mu_y - mu_y_mean) ** 2
+
+        # Trace of covariance per sample: (B,)
+        trace_cov = jnp.mean(jnp.sum(sq_dev, axis=-1), axis=0)
+
+        # Return scalar
+        return trace_cov

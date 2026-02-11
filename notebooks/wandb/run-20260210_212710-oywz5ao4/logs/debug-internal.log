@@ -1,0 +1,7 @@
+{"time":"2026-02-10T21:27:11.136596753+01:00","level":"INFO","msg":"stream: starting","core version":"0.24.2"}
+{"time":"2026-02-10T21:27:11.411442146+01:00","level":"INFO","msg":"stream: created new stream","id":"oywz5ao4"}
+{"time":"2026-02-10T21:27:11.411501075+01:00","level":"INFO","msg":"handler: started","stream_id":"oywz5ao4"}
+{"time":"2026-02-10T21:27:11.411555502+01:00","level":"INFO","msg":"stream: started","id":"oywz5ao4"}
+{"time":"2026-02-10T21:27:11.411598899+01:00","level":"INFO","msg":"sender: started","stream_id":"oywz5ao4"}
+{"time":"2026-02-10T21:27:11.41158191+01:00","level":"INFO","msg":"writer: started","stream_id":"oywz5ao4"}
+{"time":"2026-02-10T22:40:47.242149321+01:00","level":"INFO","msg":"api: retrying HTTP error","status":502,"url":"https://api.wandb.ai/files/nicola-taddei01-eth-zurich/lhf-alignment/oywz5ao4/file_stream","body":"\n<html><head>\n<meta http-equiv=\"content-type\" content=\"text/html;charset=utf-8\">\n<title>502 Server Error</title>\n</head>\n<body text=#000000 bgcolor=#ffffff>\n<h1>Error: Server Error</h1>\n<h2>The server encountered a temporary error and could not complete your request.<p>Please try again in 30 seconds.</h2>\n<h2></h2>\n</body></html>\n"}

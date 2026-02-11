@@ -1,0 +1,58 @@
+2026-02-09 15:11:45 INFO Running runs: []
+2026-02-09 15:11:46 INFO Agent received command: run
+2026-02-09 15:11:46 INFO Agent starting run with config:
+	target_manifold: {'alpha': 0.5, 'beta': 0.5, 'gamma': -1, 'name': 'flat'}
+2026-02-09 15:11:46 INFO About to run command: /usr/bin/env python pipeline.py
+2026-02-09 15:11:51 INFO Running runs: ['1ffp2hfh']
+2026-02-09 15:11:51 INFO Cleaning up finished run: 1ffp2hfh
+2026-02-09 15:11:51 INFO Agent received command: run
+2026-02-09 15:11:51 INFO Agent starting run with config:
+	target_manifold: {'alpha': 1, 'beta': 1, 'gamma': -0.5, 'name': 'baseline'}
+2026-02-09 15:11:51 INFO About to run command: /usr/bin/env python pipeline.py
+2026-02-09 15:11:56 INFO Running runs: ['mcskgbc2']
+2026-02-09 15:11:56 INFO Cleaning up finished run: mcskgbc2
+2026-02-09 15:11:56 INFO Agent received command: run
+2026-02-09 15:11:56 INFO Agent starting run with config:
+	target_manifold: {'alpha': 2, 'beta': 1.5, 'gamma': 0, 'name': 'steep'}
+2026-02-09 15:11:56 INFO About to run command: /usr/bin/env python pipeline.py
+2026-02-09 15:12:01 INFO Running runs: ['lab9ojpe']
+2026-02-09 15:12:01 ERROR Detected 3 failed runs in the first 60 seconds, shutting down.
+2026-02-09 15:12:01 INFO To disable this check set WANDB_AGENT_DISABLE_FLAPPING=true
+2026-02-09 15:16:11 INFO Running runs: []
+2026-02-09 15:16:12 INFO Agent received command: run
+2026-02-09 15:16:12 INFO Agent starting run with config:
+	target_manifold: {'alpha': 0.5, 'beta': 0.5, 'gamma': -1, 'name': 'flat'}
+2026-02-09 15:16:12 INFO About to run command: /usr/bin/env python notebooks/pipeline.py
+2026-02-09 15:16:17 INFO Running runs: ['5ctnvktf']
+2026-02-09 15:16:17 INFO Cleaning up finished run: 5ctnvktf
+2026-02-09 15:16:17 INFO Agent received command: run
+2026-02-09 15:16:17 INFO Agent starting run with config:
+	target_manifold: {'alpha': 1, 'beta': 1, 'gamma': -0.5, 'name': 'baseline'}
+2026-02-09 15:16:17 INFO About to run command: /usr/bin/env python notebooks/pipeline.py
+2026-02-09 15:17:17 INFO Running runs: []
+2026-02-09 15:17:17 INFO Agent received command: run
+2026-02-09 15:17:17 INFO Agent starting run with config:
+	target_manifold: {'alpha': 0.5, 'beta': 0.5, 'gamma': -1, 'name': 'flat'}
+2026-02-09 15:17:17 INFO About to run command: /usr/bin/env python notebooks/pipeline.py
+2026-02-09 15:17:22 INFO Running runs: ['pxy9lec2']
+2026-02-09 15:20:13 INFO Running runs: []
+2026-02-09 15:20:13 INFO Agent received command: run
+2026-02-09 15:20:13 INFO Agent starting run with config:
+	target_manifold: {'alpha': 0.5, 'beta': 0.5, 'gamma': -1, 'name': 'flat'}
+2026-02-09 15:20:13 INFO About to run command: /usr/bin/env python notebooks/pipeline.py
+2026-02-09 15:20:18 INFO Running runs: ['5vn15ly9']
+2026-02-09 15:51:04 INFO Cleaning up finished run: 5vn15ly9
+2026-02-09 15:51:04 INFO Agent received command: run
+2026-02-09 15:51:04 INFO Agent starting run with config:
+	target_manifold: {'alpha': 1, 'beta': 1, 'gamma': -0.5, 'name': 'baseline'}
+2026-02-09 15:51:04 INFO About to run command: /usr/bin/env python notebooks/pipeline.py
+2026-02-09 15:51:09 INFO Running runs: ['m6r4b57d']
+2026-02-09 16:23:01 INFO Cleaning up finished run: m6r4b57d
+2026-02-09 16:23:02 INFO Agent received command: run
+2026-02-09 16:23:02 INFO Agent starting run with config:
+	target_manifold: {'alpha': 2, 'beta': 1.5, 'gamma': 0, 'name': 'steep'}
+2026-02-09 16:23:02 INFO About to run command: /usr/bin/env python notebooks/pipeline.py
+2026-02-09 16:23:07 INFO Running runs: ['7ys709qe']
+2026-02-09 16:55:46 INFO Cleaning up finished run: 7ys709qe
+2026-02-09 16:55:46 INFO Agent received command: exit
+2026-02-09 16:55:46 INFO Received exit command. Killing runs and quitting.

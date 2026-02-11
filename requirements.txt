@@ -7,3 +7,5 @@ optax>=0.2.3
 
 # --- Plotting ---
 matplotlib>=3.8
+
+# --- Logging ---

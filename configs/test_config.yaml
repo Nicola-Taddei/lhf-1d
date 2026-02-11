@@ -1,0 +1,49 @@
+seed: 42
+
+base_manifold:
+  alpha: 0.3
+  beta: 0.2
+  gamma: 1.0
+target_manifold:
+  alpha: 0.8
+  beta: 0.2
+  gamma: 1.0
+
+n_queries: 256 # 64
+n_internal: 10000
+m: 20 #10
+vis_m: 1000
+tau: 1.0
+
+num_iter: 5 #10
+
+clip_norm: 5.0
+
+pre_train_epochs: 4000 #2000
+pre_train_lr: 1.0e-3
+pre_train_batch_dim: 256
+sigma_y_0: 1.5
+sigma_y_T: 0.1 #0.05
+
+pre_train_features:
+  - 256
+  - 256
+d_z: 1
+d_y: 2
+
+pref_lr: 1.0e-3
+pref_batch_dim: 256
+pref_train_epochs: 2000 #1000
+
+pref_model_features:
+  - 256
+  - 256
+
+align_lr: 1.0e-3
+align_batch_dim: 256
+align_epochs: 1000
+beta: 0.1 #0.001
+
+use_dispersion_loss: true
+disp_samples: 10
+gamma: 3.0 #15.0

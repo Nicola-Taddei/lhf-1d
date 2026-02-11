@@ -1,0 +1,36 @@
+method: grid
+
+command:
+  - ${env}
+  - python
+  - notebooks/pipeline.py
+
+parameters:
+  target_manifold:
+    values:
+      - name: flat
+        alpha: 0.5
+        beta: 0.5
+        gamma: -1.0
+
+      - name: baseline
+        alpha: 1.0
+        beta: 1.0
+        gamma: -0.5
+
+      - name: steep
+        alpha: 2.0
+        beta: 1.5
+        gamma: 0.0
+
+      - name: very-different
+        alpha: 8.0
+        beta: 3.5
+        gamma: -3.0
+  
+  gamma:
+    values:
+     - 1.0
+     - 3.0
+     - 5.0
+     - 10.0

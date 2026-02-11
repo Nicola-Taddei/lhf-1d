@@ -1,0 +1,44 @@
+2026-02-10 16:48:42,054 INFO    MainThread:9057 [wandb_setup.py:_flush():81] Current SDK version is 0.24.2
+2026-02-10 16:48:42,054 INFO    MainThread:9057 [wandb_setup.py:_flush():81] Configure stats pid to 9057
+2026-02-10 16:48:42,054 INFO    MainThread:9057 [wandb_setup.py:_flush():81] Loading settings from environment variables
+2026-02-10 16:48:42,055 INFO    MainThread:9057 [wandb_init.py:setup_run_log_directory():717] Logging user logs to /home/nicola/repos/lhf-1d/notebooks/wandb/run-20260210_164842-vp74c9bx/logs/debug.log
+2026-02-10 16:48:42,055 INFO    MainThread:9057 [wandb_init.py:setup_run_log_directory():718] Logging internal logs to /home/nicola/repos/lhf-1d/notebooks/wandb/run-20260210_164842-vp74c9bx/logs/debug-internal.log
+2026-02-10 16:48:42,055 INFO    MainThread:9057 [wandb_init.py:monkeypatch_ipython():636] configuring jupyter hooks <wandb.sdk.wandb_init._WandbInit object at 0x77571b7e08c0>
+2026-02-10 16:48:42,056 INFO    MainThread:9057 [wandb_init.py:init():844] calling init triggers
+2026-02-10 16:48:42,056 INFO    MainThread:9057 [wandb_init.py:init():849] wandb.init called with sweep_config: {}
+config: {'use_wandb': True, 'interactive': True, 'run_name': None, 'seed': 42, 'base_manifold': {'alpha': 0.3, 'beta': 0.2, 'gamma': 1.0}, 'target_manifold': {'alpha': 8.0, 'beta': 3.5, 'gamma': -3.0}, 'n_queries': 256, 'n_internal': 10000, 'm': 20, 'vis_m': 1000, 'tau': 1.0, 'num_iter': 10, 'clip_norm': 5.0, 'pre_train_epochs': 4000, 'pre_train_lr': 0.001, 'pre_train_batch_dim': 256, 'sigma_y_0': 1.5, 'sigma_y_T': 0.1, 'pre_train_features': [256, 256], 'd_z': 1, 'd_y': 2, 'pref_lr': 0.001, 'pref_batch_dim': 256, 'pref_train_epochs': 2000, 'pref_model_features': [256, 256], 'align_lr': 0.001, 'align_batch_dim': 256, 'align_epochs': 1000, 'beta': 0.01, 'use_dispersion_loss': False, 'disp_samples': 10, 'gamma': 3.0, '_wandb': {}}
+2026-02-10 16:48:42,056 INFO    MainThread:9057 [wandb_init.py:init():892] starting backend
+2026-02-10 16:48:42,305 INFO    MainThread:9057 [wandb_init.py:init():895] sending inform_init request
+2026-02-10 16:48:42,312 INFO    MainThread:9057 [wandb_init.py:init():903] backend started and connected
+2026-02-10 16:48:42,316 INFO    MainThread:9057 [wandb_run.py:_label_probe_notebook():1334] probe notebook
+2026-02-10 16:48:42,316 INFO    MainThread:9057 [wandb_run.py:_label_probe_notebook():1344] Unable to probe notebook: Expecting value: line 1 column 1 (char 0)
+2026-02-10 16:48:42,316 INFO    MainThread:9057 [wandb_init.py:init():973] updated telemetry
+2026-02-10 16:48:42,354 INFO    MainThread:9057 [wandb_init.py:init():997] communicating run to backend with 90.0 second timeout
+2026-02-10 16:48:42,995 INFO    MainThread:9057 [wandb_init.py:init():1042] starting run threads in backend
+2026-02-10 16:48:43,083 INFO    MainThread:9057 [wandb_run.py:_console_start():2529] atexit reg
+2026-02-10 16:48:43,083 INFO    MainThread:9057 [wandb_run.py:_redirect():2377] redirect: wrap_raw
+2026-02-10 16:48:43,084 INFO    MainThread:9057 [wandb_run.py:_redirect():2446] Wrapping output streams.
+2026-02-10 16:48:43,084 INFO    MainThread:9057 [wandb_run.py:_redirect():2469] Redirects installed.
+2026-02-10 16:48:43,086 INFO    MainThread:9057 [wandb_init.py:init():1082] run started, returning control to user process
+2026-02-10 16:48:43,498 INFO    MainThread:9057 [wandb_init.py:_post_run_cell_hook():606] [no run ID] resuming backend
+2026-02-10 16:48:43,508 INFO    MainThread:9057 [jupyter.py:save_ipynb():359] [no run ID] not saving jupyter notebook
+2026-02-10 16:48:43,509 INFO    MainThread:9057 [wandb_init.py:_pre_run_cell_hook():595] [no run ID] pausing backend
+2026-02-10 16:48:43,511 INFO    MainThread:9057 [wandb_init.py:_post_run_cell_hook():606] [no run ID] resuming backend
+2026-02-10 16:48:43,533 INFO    MainThread:9057 [jupyter.py:save_ipynb():359] [no run ID] not saving jupyter notebook
+2026-02-10 16:48:43,533 INFO    MainThread:9057 [wandb_init.py:_pre_run_cell_hook():595] [no run ID] pausing backend
+2026-02-10 16:48:46,599 INFO    MainThread:9057 [wandb_init.py:_post_run_cell_hook():606] [no run ID] resuming backend
+2026-02-10 16:48:46,616 INFO    MainThread:9057 [jupyter.py:save_ipynb():359] [no run ID] not saving jupyter notebook
+2026-02-10 16:48:46,616 INFO    MainThread:9057 [wandb_init.py:_pre_run_cell_hook():595] [no run ID] pausing backend
+2026-02-10 16:48:49,672 INFO    MainThread:9057 [wandb_init.py:_post_run_cell_hook():606] [no run ID] resuming backend
+2026-02-10 16:48:49,693 INFO    MainThread:9057 [jupyter.py:save_ipynb():359] [no run ID] not saving jupyter notebook
+2026-02-10 16:48:49,693 INFO    MainThread:9057 [wandb_init.py:_pre_run_cell_hook():595] [no run ID] pausing backend
+2026-02-10 16:49:30,334 INFO    MainThread:9057 [wandb_init.py:_post_run_cell_hook():606] [no run ID] resuming backend
+2026-02-10 20:12:43,186 INFO    MainThread:9057 [jupyter.py:save_ipynb():359] [no run ID] not saving jupyter notebook
+2026-02-10 20:12:43,188 INFO    MainThread:9057 [wandb_init.py:_pre_run_cell_hook():595] [no run ID] pausing backend
+2026-02-10 20:12:43,551 INFO    MainThread:9057 [wandb_run.py:_finish():2295] finishing run nicola-taddei01-eth-zurich/lhf-alignment/vp74c9bx
+2026-02-10 20:12:43,555 INFO    MainThread:9057 [jupyter.py:save_ipynb():359] not saving jupyter notebook
+2026-02-10 20:12:43,556 INFO    MainThread:9057 [wandb_init.py:_jupyter_teardown():621] cleaning up jupyter logic
+2026-02-10 20:12:43,556 INFO    MainThread:9057 [wandb_run.py:_atexit_cleanup():2494] got exitcode: 0
+2026-02-10 20:12:43,557 INFO    MainThread:9057 [wandb_run.py:_restore():2476] restore
+2026-02-10 20:12:43,558 INFO    MainThread:9057 [wandb_run.py:_restore():2482] restore done
+2026-02-10 20:12:44,437 INFO    MainThread:9057 [wandb_run.py:_footer_sync_info():3871] logging synced files

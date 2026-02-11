@@ -200,7 +200,35 @@ class ManifoldVisualizer:
             ax.set_xlim(self.xlim)
             ax.set_ylim(self.ylim)
         else:
-            ax.set_xlim(self.xlim)
+            y1_min, y1_max = ys[:, 0].min(), ys[:, 0].max()
+            y2_min, y2_max = ys[:, 1].min(), ys[:, 1].max()
+
+            margin_ratio = 0.1
+            y1_range = y1_max - y1_min + 1e-8
+            y2_range = y2_max - y2_min + 1e-8
+
+            y1_min -= margin_ratio * y1_range
+            y1_max += margin_ratio * y1_range
+            y2_min -= margin_ratio * y2_range
+            y2_max += margin_ratio * y2_range
+
+            # -------------------------------------------------
+            # Enforce minimum FoV from constructor
+            # -------------------------------------------------
+            min_width  = self.xlim[1] - self.xlim[0]
+            min_height = self.ylim[1] - self.ylim[0]
+
+            center_y1 = 0.5 * (y1_min + y1_max)
+            center_y2 = 0.5 * (y2_min + y2_max)
+
+            width  = max(y1_max - y1_min, min_width)
+            height = max(y2_max - y2_min, min_height)
+
+            ax.set_xlim(center_y1 - width / 2, center_y1 + width / 2)
+            ax.set_ylim(center_y2 - height / 2, center_y2 + height / 2)
+
+            # Preserve geometry
+            ax.set_aspect("equal", adjustable="box")
         ax.set_xlabel(r"$y_1$")
         ax.set_ylabel(r"$y_2$")
         ax.set_title(rf"$y \sim p(y \mid x={x:.3f})$")
@@ -238,3 +266,5 @@ class ManifoldVisualizer:
         ax.legend(handles=handles, loc="best")
 
         plt.show()
+
+        return fig

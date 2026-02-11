@@ -18,3 +18,5 @@ from .preferences import(
 )
 
 from .logging import Logger
+
+from .utils import merge_configs
