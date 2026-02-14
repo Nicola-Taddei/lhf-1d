@@ -1,0 +1,8 @@
+wandb_version: 1
+
+target_manifold:
+  value:
+    alpha: 8
+    beta: 3.5
+    gamma: -3
+    name: very-different

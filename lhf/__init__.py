@@ -17,6 +17,11 @@ from .preferences import(
     PrefModel
 )
 
-from .logging import Logger
+from .logging import (
+    Logger,
+    WandbLogger
+)
+
+from .serialization import load_flax_pytree, save_flax_pytree
 
 from .utils import merge_configs

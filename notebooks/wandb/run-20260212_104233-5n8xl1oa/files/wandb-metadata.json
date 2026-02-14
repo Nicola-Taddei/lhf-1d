@@ -1,0 +1,40 @@
+{
+  "os": "Linux-6.14.0-36-generic-x86_64-with-glibc2.39",
+  "python": "CPython 3.12.3",
+  "startedAt": "2026-02-12T09:42:33.345294Z",
+  "program": "/home/nicola/repos/lhf-1d/notebooks/pipeline.py",
+  "codePath": "/home/nicola/repos/lhf-1d/notebooks/pipeline.py",
+  "codePathLocal": "pipeline.py",
+  "git": {
+    "remote": "git@github.com:Nicola-Taddei/lhf-1d.git",
+    "commit": "99970d0c0ae80da1f5e71f53dfd29d3578326978"
+  },
+  "email": "nicola.taddei01@gmail.com",
+  "root": "/home/nicola/repos/lhf-1d/notebooks",
+  "host": "nicola-XPS-15-9500",
+  "executable": "/home/nicola/repos/lhf-1d/venv/bin/python",
+  "cpu_count": 6,
+  "cpu_count_logical": 12,
+  "gpu": "NVIDIA GeForce GTX 1650 Ti",
+  "gpu_count": 1,
+  "disk": {
+    "/": {
+      "total": "982240026624",
+      "used": "95354478592"
+    }
+  },
+  "memory": {
+    "total": "16501477376"
+  },
+  "gpu_nvidia": [
+    {
+      "name": "NVIDIA GeForce GTX 1650 Ti",
+      "memoryTotal": "4294967296",
+      "cudaCores": 1024,
+      "architecture": "Turing",
+      "uuid": "GPU-c16d0bf3-a59f-0208-0e17-fce7c6c4cf1b"
+    }
+  ],
+  "cudaVersion": "13.0",
+  "writerId": "rxql36be18g6m5u1msa7kmkq1h513obn"
+}

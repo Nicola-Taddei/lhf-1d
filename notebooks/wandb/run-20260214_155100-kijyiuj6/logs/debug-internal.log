@@ -1,0 +1,6 @@
+{"time":"2026-02-14T15:51:01.202377877+01:00","level":"INFO","msg":"stream: starting","core version":"0.24.2"}
+{"time":"2026-02-14T15:51:01.474312515+01:00","level":"INFO","msg":"stream: created new stream","id":"kijyiuj6"}
+{"time":"2026-02-14T15:51:01.474488909+01:00","level":"INFO","msg":"handler: started","stream_id":"kijyiuj6"}
+{"time":"2026-02-14T15:51:01.474767065+01:00","level":"INFO","msg":"stream: started","id":"kijyiuj6"}
+{"time":"2026-02-14T15:51:01.474843972+01:00","level":"INFO","msg":"writer: started","stream_id":"kijyiuj6"}
+{"time":"2026-02-14T15:51:01.47489048+01:00","level":"INFO","msg":"sender: started","stream_id":"kijyiuj6"}

@@ -1,0 +1,14 @@
+wandb:
+  project: lhf-alignment
+  artifact_name: data
+  artifact_version: latest
+  artifact_type: data
+
+analysis:
+  iteration: 0
+  vis_m: 32
+  seed: 0
+
+visualization:
+  ylim: [-1, 5]
+  scale: free

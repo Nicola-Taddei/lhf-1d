@@ -1,17 +1,17 @@
 use_wandb: true
 #use_wandb: false
-interactive: true
+interactive: false #true
 run_name: null
 seed: 42
 
 base_manifold:
   alpha: 0.3
   beta: 0.2
-  gamma: 1.0
+  gamma: 0.0
 target_manifold:
-  alpha: 8.0 #0.8
-  beta: 3.5 #0.2
-  gamma: -3.0 #1.0
+  alpha: 0.7 #0.5
+  beta: 0.1 #0.5
+  gamma: 0.0 #-1.0
 
 n_queries: 256 # 64
 n_internal: 10000
@@ -19,7 +19,7 @@ m: 20 #10
 vis_m: 1000
 tau: 1.0
 
-num_iter: 10
+num_iter: 1 #10
 
 clip_norm: 5.0
 
@@ -48,6 +48,7 @@ align_batch_dim: 256
 align_epochs: 1000
 beta: 0.01 #0.001
 
-use_dispersion_loss: true
+creativity-incentive: var-target # max-var, none, var-target
 disp_samples: 10
-gamma: 3.0 #15.0
+gamma: 5.0 #15.0
+var-target: 5.0

@@ -56,3 +56,131 @@
 2026-02-09 16:55:46 INFO Cleaning up finished run: 7ys709qe
 2026-02-09 16:55:46 INFO Agent received command: exit
 2026-02-09 16:55:46 INFO Received exit command. Killing runs and quitting.
+2026-02-11 01:59:53 INFO Running runs: []
+2026-02-11 01:59:54 INFO Agent received command: run
+2026-02-11 01:59:54 INFO Agent starting run with config:
+	gamma: 1
+	target_manifold: {'alpha': 0.5, 'beta': 0.5, 'gamma': -1, 'name': 'flat'}
+2026-02-11 01:59:54 INFO About to run command: /usr/bin/env python notebooks/pipeline.py
+2026-02-11 01:59:59 INFO Running runs: ['on3s4rbi']
+2026-02-11 02:00:38 INFO Running runs: []
+2026-02-11 02:00:38 INFO Agent received command: run
+2026-02-11 02:00:38 INFO Agent starting run with config:
+	gamma: 1
+	target_manifold: {'alpha': 0.5, 'beta': 0.5, 'gamma': -1, 'name': 'flat'}
+2026-02-11 02:00:38 INFO About to run command: /usr/bin/env python notebooks/pipeline.py
+2026-02-11 02:00:43 INFO Running runs: ['b63lows4']
+2026-02-11 02:36:23 INFO Cleaning up finished run: b63lows4
+2026-02-11 02:36:23 INFO Agent received command: run
+2026-02-11 02:36:23 INFO Agent starting run with config:
+	gamma: 1
+	target_manifold: {'alpha': 1, 'beta': 1, 'gamma': -0.5, 'name': 'baseline'}
+2026-02-11 02:36:23 INFO About to run command: /usr/bin/env python notebooks/pipeline.py
+2026-02-11 02:36:28 INFO Running runs: ['q7y3z9vl']
+2026-02-11 02:43:12 INFO Running runs: []
+2026-02-11 02:43:12 INFO Agent received command: run
+2026-02-11 02:43:12 INFO Agent starting run with config:
+	gamma: 1
+	target_manifold: {'alpha': 0.5, 'beta': 0.5, 'gamma': -1, 'name': 'flat'}
+2026-02-11 02:43:12 INFO About to run command: /usr/bin/env python notebooks/pipeline.py
+2026-02-11 02:43:17 INFO Running runs: ['96o9gr5a']
+2026-02-11 03:18:41 INFO Cleaning up finished run: 96o9gr5a
+2026-02-11 03:18:42 INFO Agent received command: run
+2026-02-11 03:18:42 INFO Agent starting run with config:
+	gamma: 1
+	target_manifold: {'alpha': 1, 'beta': 1, 'gamma': -0.5, 'name': 'baseline'}
+2026-02-11 03:18:42 INFO About to run command: /usr/bin/env python notebooks/pipeline.py
+2026-02-11 03:18:47 INFO Running runs: ['fn7jbj43']
+2026-02-11 09:11:58 INFO Running runs: []
+2026-02-11 09:11:59 INFO Agent received command: run
+2026-02-11 09:11:59 INFO Agent starting run with config:
+	target_manifold: {'alpha': 0.5, 'beta': 0.5, 'gamma': -1, 'name': 'flat'}
+2026-02-11 09:11:59 INFO About to run command: /usr/bin/env python notebooks/pipeline.py
+2026-02-11 09:12:04 INFO Running runs: ['v8xpmbxa']
+2026-02-11 09:43:41 INFO Cleaning up finished run: v8xpmbxa
+2026-02-11 09:43:41 INFO Agent received command: run
+2026-02-11 09:43:41 INFO Agent starting run with config:
+	target_manifold: {'alpha': 1, 'beta': 1, 'gamma': -0.5, 'name': 'baseline'}
+2026-02-11 09:43:41 INFO About to run command: /usr/bin/env python notebooks/pipeline.py
+2026-02-11 09:43:46 INFO Running runs: ['of9d6g2y']
+2026-02-11 10:17:50 INFO Cleaning up finished run: of9d6g2y
+2026-02-11 10:17:51 INFO Agent received command: run
+2026-02-11 10:17:51 INFO Agent starting run with config:
+	target_manifold: {'alpha': 8, 'beta': 3.5, 'gamma': -3, 'name': 'very-different'}
+2026-02-11 10:17:51 INFO About to run command: /usr/bin/env python notebooks/pipeline.py
+2026-02-11 10:17:56 INFO Running runs: ['7d5gught']
+2026-02-11 10:52:16 INFO Cleaning up finished run: 7d5gught
+2026-02-11 10:52:16 INFO Agent received command: exit
+2026-02-11 10:52:16 INFO Received exit command. Killing runs and quitting.
+2026-02-14 22:34:25 INFO Running runs: []
+2026-02-14 22:34:26 INFO Agent received command: run
+2026-02-14 22:34:26 INFO Agent starting run with config:
+	creativity-incentive: var-target
+	target_manifold: {'alpha': 0.5, 'beta': 0.5, 'gamma': 0, 'name': 'close'}
+2026-02-14 22:34:26 INFO About to run command: /usr/bin/env python notebooks/pipeline.py
+2026-02-14 22:34:31 INFO Running runs: ['s64n4hwd']
+2026-02-14 22:34:31 INFO Cleaning up finished run: s64n4hwd
+2026-02-14 22:34:32 INFO Agent received command: run
+2026-02-14 22:34:32 INFO Agent starting run with config:
+	creativity-incentive: var-target
+	target_manifold: {'alpha': 1, 'beta': 0.5, 'gamma': 0, 'name': 'neutral'}
+2026-02-14 22:34:32 INFO About to run command: /usr/bin/env python notebooks/pipeline.py
+2026-02-14 22:34:37 INFO Running runs: ['xm9zhobi']
+2026-02-14 22:34:37 INFO Cleaning up finished run: xm9zhobi
+2026-02-14 22:34:38 INFO Agent received command: run
+2026-02-14 22:34:38 INFO Agent starting run with config:
+	creativity-incentive: var-target
+	target_manifold: {'alpha': 0.7, 'beta': 0.1, 'gamma': 0, 'name': 'far'}
+2026-02-14 22:34:38 INFO About to run command: /usr/bin/env python notebooks/pipeline.py
+2026-02-14 22:34:43 INFO Running runs: ['90carfv2']
+2026-02-14 22:34:43 ERROR Detected 3 failed runs in the first 60 seconds, shutting down.
+2026-02-14 22:34:43 INFO To disable this check set WANDB_AGENT_DISABLE_FLAPPING=true
+2026-02-14 22:35:18 INFO Running runs: []
+2026-02-14 22:35:18 INFO Agent received command: run
+2026-02-14 22:35:18 INFO Agent starting run with config:
+	creativity-incentive: var-target
+	target_manifold: {'alpha': 0.5, 'beta': 0.5, 'gamma': 0, 'name': 'close'}
+2026-02-14 22:35:18 INFO About to run command: /usr/bin/env python notebooks/pipeline.py
+2026-02-14 22:35:23 INFO Running runs: ['wqlz0qb9']
+2026-02-14 22:40:47 INFO Running runs: []
+2026-02-14 22:40:47 INFO Agent received command: run
+2026-02-14 22:40:47 INFO Agent starting run with config:
+	creativity-incentive: var-target
+	target_manifold: {'alpha': 0.5, 'beta': 0.5, 'gamma': 0, 'name': 'close'}
+2026-02-14 22:40:47 INFO About to run command: /usr/bin/env python notebooks/pipeline.py
+2026-02-14 22:40:52 INFO Running runs: ['byjbvj4m']
+2026-02-14 22:45:10 INFO Cleaning up finished run: byjbvj4m
+2026-02-14 22:45:11 INFO Agent received command: run
+2026-02-14 22:45:11 INFO Agent starting run with config:
+	creativity-incentive: var-target
+	target_manifold: {'alpha': 1, 'beta': 0.5, 'gamma': 0, 'name': 'neutral'}
+2026-02-14 22:45:11 INFO About to run command: /usr/bin/env python notebooks/pipeline.py
+2026-02-14 22:45:16 INFO Running runs: ['iap463ic']
+2026-02-14 22:50:00 INFO Cleaning up finished run: iap463ic
+2026-02-14 22:50:01 INFO Agent received command: run
+2026-02-14 22:50:01 INFO Agent starting run with config:
+	creativity-incentive: var-target
+	target_manifold: {'alpha': 0.7, 'beta': 0.1, 'gamma': 0, 'name': 'far'}
+2026-02-14 22:50:01 INFO About to run command: /usr/bin/env python notebooks/pipeline.py
+2026-02-14 22:50:06 INFO Running runs: ['0f6ojvpl']
+2026-02-14 22:54:51 INFO Cleaning up finished run: 0f6ojvpl
+2026-02-14 22:54:51 INFO Agent received command: run
+2026-02-14 22:54:51 INFO Agent starting run with config:
+	creativity-incentive: max-var
+	target_manifold: {'alpha': 0.5, 'beta': 0.5, 'gamma': 0, 'name': 'close'}
+2026-02-14 22:54:51 INFO About to run command: /usr/bin/env python notebooks/pipeline.py
+2026-02-14 22:54:56 INFO Running runs: ['oxbbmecv']
+2026-02-14 22:59:46 INFO Cleaning up finished run: oxbbmecv
+2026-02-14 22:59:47 INFO Agent received command: run
+2026-02-14 22:59:47 INFO Agent starting run with config:
+	creativity-incentive: max-var
+	target_manifold: {'alpha': 1, 'beta': 0.5, 'gamma': 0, 'name': 'neutral'}
+2026-02-14 22:59:47 INFO About to run command: /usr/bin/env python notebooks/pipeline.py
+2026-02-14 22:59:52 INFO Running runs: ['osihb3yw']
+2026-02-14 23:04:46 INFO Cleaning up finished run: osihb3yw
+2026-02-14 23:04:47 INFO Agent received command: run
+2026-02-14 23:04:47 INFO Agent starting run with config:
+	creativity-incentive: max-var
+	target_manifold: {'alpha': 0.7, 'beta': 0.1, 'gamma': 0, 'name': 'far'}
+2026-02-14 23:04:47 INFO About to run command: /usr/bin/env python notebooks/pipeline.py
+2026-02-14 23:04:52 INFO Running runs: ['1wrc0ubh']

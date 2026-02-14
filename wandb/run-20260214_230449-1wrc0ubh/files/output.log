@@ -1,0 +1,2 @@
+/home/nicola/repos/lhf-1d/lhf/task.py:284: UserWarning: FigureCanvasAgg is non-interactive, and thus cannot be shown
+  plt.show()

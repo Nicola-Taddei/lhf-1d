@@ -1,0 +1,10 @@
+wandb_version: 1
+
+creativity-incentive:
+  value: max-var
+target_manifold:
+  value:
+    alpha: 0.7
+    beta: 0.1
+    gamma: 0
+    name: far

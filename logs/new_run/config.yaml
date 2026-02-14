@@ -7,9 +7,9 @@ base_manifold:
   beta: 0.2
   gamma: 1
 target_manifold:
-  alpha: 8
-  beta: 3.5
-  gamma: -3
+  gamma: -1
+  alpha: 0.5
+  beta: 0.5
 n_queries: 256
 n_internal: 10000
 m: 20
@@ -37,6 +37,7 @@ align_lr: 0.001
 align_batch_dim: 256
 align_epochs: 1000
 beta: 0.01
-use_dispersion_loss: true
+creativity-incentive: var-target
 disp_samples: 10
-gamma: 3
+gamma: 5
+var-target: 5

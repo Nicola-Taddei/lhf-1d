@@ -1,0 +1,6 @@
+{"time":"2026-02-12T10:06:51.722553631+01:00","level":"INFO","msg":"stream: starting","core version":"0.24.2"}
+{"time":"2026-02-12T10:06:51.96547233+01:00","level":"INFO","msg":"stream: created new stream","id":"wra5fhpp"}
+{"time":"2026-02-12T10:06:51.965549236+01:00","level":"INFO","msg":"handler: started","stream_id":"wra5fhpp"}
+{"time":"2026-02-12T10:06:51.965657211+01:00","level":"INFO","msg":"stream: started","id":"wra5fhpp"}
+{"time":"2026-02-12T10:06:51.96568069+01:00","level":"INFO","msg":"writer: started","stream_id":"wra5fhpp"}
+{"time":"2026-02-12T10:06:51.965685853+01:00","level":"INFO","msg":"sender: started","stream_id":"wra5fhpp"}

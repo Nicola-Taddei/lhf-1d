@@ -1,0 +1,6 @@
+{"time":"2026-02-12T10:08:36.56096902+01:00","level":"INFO","msg":"stream: starting","core version":"0.24.2"}
+{"time":"2026-02-12T10:08:36.814357134+01:00","level":"INFO","msg":"stream: created new stream","id":"txipt8pi"}
+{"time":"2026-02-12T10:08:36.814483417+01:00","level":"INFO","msg":"handler: started","stream_id":"txipt8pi"}
+{"time":"2026-02-12T10:08:36.814715834+01:00","level":"INFO","msg":"stream: started","id":"txipt8pi"}
+{"time":"2026-02-12T10:08:36.814781284+01:00","level":"INFO","msg":"writer: started","stream_id":"txipt8pi"}
+{"time":"2026-02-12T10:08:36.81485348+01:00","level":"INFO","msg":"sender: started","stream_id":"txipt8pi"}

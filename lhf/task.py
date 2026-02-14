@@ -98,15 +98,17 @@ class ManifoldVisualizer:
         target_manifold=None,
         learned_manifold=None,
         labels=None,
-        scale="fixed"
+        scale="fixed",
     ):
         """
         Args:
-            x: scalar (conditioning value)
+            x: scalar conditioning value
             ys: (B, 2) array of samples
             base_manifold: TaskParams or None
             target_manifold: TaskParams or None
+            learned_manifold: callable or None
             labels: (B,) array with {0,1} or None
+            scale: "fixed" or "free"
         """
         ys = np.asarray(ys)
 
@@ -136,10 +138,45 @@ class ManifoldVisualizer:
             )
 
         # -------------------------------------------------
+        # Determine plotting limits
+        # -------------------------------------------------
+        if scale == "fixed":
+            xlim = self.xlim
+            ylim = self.ylim
+        else:
+            y1_min, y1_max = ys[:, 0].min(), ys[:, 0].max()
+            y2_min, y2_max = ys[:, 1].min(), ys[:, 1].max()
+
+            margin_ratio = 0.1
+            y1_range = y1_max - y1_min + 1e-8
+            y2_range = y2_max - y2_min + 1e-8
+
+            y1_min -= margin_ratio * y1_range
+            y1_max += margin_ratio * y1_range
+            y2_min -= margin_ratio * y2_range
+            y2_max += margin_ratio * y2_range
+
+            # Enforce minimum FoV from constructor
+            min_width = self.xlim[1] - self.xlim[0]
+            min_height = self.ylim[1] - self.ylim[0]
+
+            center_y1 = 0.5 * (y1_min + y1_max)
+            center_y2 = 0.5 * (y2_min + y2_max)
+
+            width = max(y1_max - y1_min, min_width)
+            height = max(y2_max - y2_min, min_height)
+
+            xlim = (center_y1 - width / 2, center_y1 + width / 2)
+            ylim = (center_y2 - height / 2, center_y2 + height / 2)
+
+        # -------------------------------------------------
+        # Build grid AFTER limits are known
+        # -------------------------------------------------
+        y1_grid = np.linspace(xlim[0], xlim[1], self.num_curve_points)
+
+        # -------------------------------------------------
         # Plot base manifold
         # -------------------------------------------------
-        y1_grid = np.linspace(self.xlim[0], self.xlim[1], self.num_curve_points)
-
         if base_manifold is not None:
             y2_base = manifold(
                 x,
@@ -175,68 +212,48 @@ class ManifoldVisualizer:
                 label="supp(p_preference)",
             )
 
+        # -------------------------------------------------
+        # Plot learned manifold
+        # -------------------------------------------------
         if learned_manifold is not None:
             y2_learned = jnp.squeeze(
                 learned_manifold(
                     jnp.broadcast_to(
                         x[None, None, None],
-                        y1_grid[None,...,None].shape
+                        y1_grid[None, ..., None].shape,
                     ),
-                    y1_grid[None,...,None]
+                    y1_grid[None, ..., None],
                 )
             )
             ax.plot(
                 y1_grid,
-                y2_learned,
+                np.asarray(y2_learned),
                 color="orange",
                 linewidth=2.0,
                 label="learned manifold",
             )
 
         # -------------------------------------------------
+        # Apply limits
+        # -------------------------------------------------
+        ax.set_xlim(xlim)
+        ax.set_ylim(ylim)
+
+        # Preserve geometry in free mode
+        if scale == "free":
+            ax.set_aspect("equal", adjustable="box")
+
+        # -------------------------------------------------
         # Formatting
         # -------------------------------------------------
-        if scale == "fixed":
-            ax.set_xlim(self.xlim)
-            ax.set_ylim(self.ylim)
-        else:
-            y1_min, y1_max = ys[:, 0].min(), ys[:, 0].max()
-            y2_min, y2_max = ys[:, 1].min(), ys[:, 1].max()
-
-            margin_ratio = 0.1
-            y1_range = y1_max - y1_min + 1e-8
-            y2_range = y2_max - y2_min + 1e-8
-
-            y1_min -= margin_ratio * y1_range
-            y1_max += margin_ratio * y1_range
-            y2_min -= margin_ratio * y2_range
-            y2_max += margin_ratio * y2_range
-
-            # -------------------------------------------------
-            # Enforce minimum FoV from constructor
-            # -------------------------------------------------
-            min_width  = self.xlim[1] - self.xlim[0]
-            min_height = self.ylim[1] - self.ylim[0]
-
-            center_y1 = 0.5 * (y1_min + y1_max)
-            center_y2 = 0.5 * (y2_min + y2_max)
-
-            width  = max(y1_max - y1_min, min_width)
-            height = max(y2_max - y2_min, min_height)
-
-            ax.set_xlim(center_y1 - width / 2, center_y1 + width / 2)
-            ax.set_ylim(center_y2 - height / 2, center_y2 + height / 2)
-
-            # Preserve geometry
-            ax.set_aspect("equal", adjustable="box")
         ax.set_xlabel(r"$y_1$")
         ax.set_ylabel(r"$y_2$")
         ax.set_title(rf"$y \sim p(y \mid x={x:.3f})$")
         ax.grid(True)
-        #ax.legend()
+
         handles, labels_legend = ax.get_legend_handles_labels()
 
-        # Add proxy artists only if labels were provided
+        # Add proxy artists if labels were provided
         if labels is not None:
             proxy_handles = [
                 Line2D(
@@ -260,7 +277,6 @@ class ManifoldVisualizer:
                     label="disliked samples",
                 ),
             ]
-
             handles += proxy_handles
 
         ax.legend(handles=handles, loc="best")

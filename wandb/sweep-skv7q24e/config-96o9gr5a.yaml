@@ -1,0 +1,10 @@
+wandb_version: 1
+
+gamma:
+  value: 1
+target_manifold:
+  value:
+    alpha: 0.5
+    beta: 0.5
+    gamma: -1
+    name: flat

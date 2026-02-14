@@ -29,23 +29,26 @@ if not interactive:
 wandb_flag = config.get("use_wandb", False)
 
 if wandb_flag:
-    wandb.init(
+    run = wandb.init(
         project="lhf-alignment",
         name=config.get("run_name", None),
         config=config,
         mode="online",          # oppure "offline"
     )
     config = dict(wandb.config)
-    artifact = wandb.Artifact(
-        name="data",
-        type="data",
-        description="All data generated during this run"
-    )
 
-logger = Logger(
-    log_dir="../logs/new_run",
-    config=config
-)
+    logger = WandbLogger(
+        run,
+        "../logs/new_run",
+        config,
+        "data",
+        "data"
+    )
+else:
+    logger = Logger(
+        log_dir="../logs/new_run",
+        config=config
+    )
 
 key = jax.random.PRNGKey(config["seed"])
 
@@ -85,12 +88,6 @@ xs = jnp.broadcast_to(
 )   # (B,m,1)
 
 logger.log_data(np.array(xs), "xs.npy")
-data_name = "xs.npy"
-data_path = logger.log_dir / data_name
-artifact.add_file(
-    data_path,
-    name=data_name
-)
 
 vmapped_sample_manifold = jax.vmap(
     sample_manifold,
@@ -128,13 +125,7 @@ fig = task_vis.visualize(
     target_manifold=target_p,
     labels=gt_labels[0]
 )
-data_name = Path("base") / "vis.png"
-logger.log_data(fig, data_name)
-data_path = logger.log_dir / data_name
-artifact.add_file(
-    data_path,
-    data_name
-)
+logger.log_data(fig, Path("base") / "vis.png")
 
 
 # %% Training loop: Initialization
@@ -205,13 +196,7 @@ vae_params = {
     "encoder": encoder_mlp.init(init_key, xy_batch),
     "decoder": decoder_mlp.init(init_key, xz_batch)
 }
-data_name = "base/vae_params.npz"
-logger.log_data(vae_params, data_name)
-data_path = logger.log_dir / data_name
-artifact.add_file(
-    data_path,
-    data_name
-)
+logger.log_data(vae_params, "base/vae_params.flax")
 
 def pre_train_loss_fn(params, step, key, x, y):
         return -jnp.mean(
@@ -265,13 +250,7 @@ init_batch = jnp.zeros((pref_batch_dim, m, 2))
 pref_params = {
     "y2_fn": mlp.init(init_key, init_batch),
 }
-data_name = "base/pref_params.npz"
-logger.log_data(pref_params, data_name)
-data_path = logger.log_dir / data_name
-artifact.add_file(
-    data_path,
-    name=data_name
-)
+logger.log_data(pref_params, "base/pref_params.flax")
 
 y2_learned = lambda p, x, y1: mlp.apply(p, jnp.concatenate([x,y1], axis=2))
 
@@ -361,7 +340,7 @@ def align_loss(params, base_vae_params, y2_params, key, x, sigma_y):
         x,
         sigma_y
     )
-    if config["use_dispersion_loss"]:
+    if config["creativity-incentive"] == "max-var":
         gamma = config["gamma"]
         dispersion = disp(
             params,
@@ -370,6 +349,15 @@ def align_loss(params, base_vae_params, y2_params, key, x, sigma_y):
             n_z=config["disp_samples"]
         )
         loss = -u_bar + beta * kl - gamma * jnp.log(dispersion)
+    elif config["creativity-incentive"] == "var-target":
+        gamma = config["gamma"]
+        dispersion = disp(
+            params,
+            x,
+            key,
+            n_z=config["disp_samples"]
+        )
+        loss = -u_bar + beta *kl + gamma * (dispersion - config["var-target"])**2
     else:
         loss = -u_bar + beta * kl
 
@@ -438,13 +426,7 @@ for iter in range(num_iter):
         print(f"[{step+1}/{pre_train_epochs}] -ELBO = {loss_val}")
 
     vae_params = vae_params_best
-    data_name = log_folder / "vae_params.npz"
-    logger.log_data(vae_params, data_name)
-    data_path = logger.log_dir / data_name
-    artifact.add_file(
-        data_path,
-        data_name
-    )
+    logger.log_data(vae_params, log_folder / "vae_params.flax")
 
     # Plot loss
     fig = plt.figure(figsize=(5, 3), dpi=200)
@@ -455,17 +437,23 @@ for iter in range(num_iter):
     plt.grid(True)
     plt.tight_layout()
     plt.show()
-    data_name = log_folder / "vae_pre_training_loss.png"
-    logger.log_data(fig, data_name)
-    data_path = logger.log_dir / data_name
-    artifact.add_file(
-        data_path,
-        data_name
-    )
+    logger.log_data(fig, log_folder / "vae_pre_training_loss.png")
 
     ys = sample_many(vae_params, ys_key, xs[:,0], m)
     ys_query = ys[:n_queries]
     y_history.append(ys_query)   # ys for queries
+
+    var = disp(
+        vae_params,
+        xs[:,0],
+        ys_key,
+        n_z=config["disp_samples"]
+    )
+
+    if wandb_flag:
+        wandb.log({
+            "variance": float(var)
+        })
 
     logits = logpdf_labels(
         xs,
@@ -510,13 +498,7 @@ for iter in range(num_iter):
         #labels=gt_labels[0],
         scale="free"
     )
-    data_name = log_folder / "pre_trained_disp_samples.png"
-    logger.log_data(fig, data_name)
-    data_path = logger.log_dir / data_name
-    artifact.add_file(
-        data_path,
-        data_name
-    )
+    logger.log_data(fig, log_folder / "pre_trained_disp_samples.png")
 
     mean_u = jnp.mean(u)
     gt_u_history.append(float(mean_u))
@@ -529,13 +511,7 @@ for iter in range(num_iter):
         labels=gt_labels[0],
         scale="free"
     )
-    data_name = log_folder / "pre_trained_samples.png"
-    logger.log_data(fig, data_name)
-    data_path = logger.log_dir / data_name
-    artifact.add_file(
-        data_path,
-        data_name
-    )
+    logger.log_data(fig, log_folder / "pre_trained_samples.png")
 
 
     # Step 2: Learn preference model
@@ -577,13 +553,7 @@ for iter in range(num_iter):
             })
         print(f"[{step+1}/{pref_train_epochs}] NLL = {loss_val:.4f}")
 
-    data_name = log_folder / "pref_params.npz"
-    logger.log_data(pref_params, data_name)
-    data_path = logger.log_dir / data_name
-    artifact.add_file(
-        data_path,
-        data_name
-    )
+    logger.log_data(pref_params, log_folder / "pref_params.flax")
 
     # Plot loss
     fig = plt.figure(figsize=(5, 3), dpi=200)
@@ -594,13 +564,7 @@ for iter in range(num_iter):
     plt.grid(True)
     plt.tight_layout()
     plt.show()
-    data_name = log_folder / "pref_training_loss.png"
-    logger.log_data(fig, data_name)
-    data_path = logger.log_dir / data_name
-    artifact.add_file(
-        data_path,
-        data_name
-    )
+    logger.log_data(fig, log_folder / "pref_training_loss.png")
 
     pred_logits = pref_model.logpdf(
         pref_params,
@@ -651,14 +615,20 @@ for iter in range(num_iter):
         labels=gt_labels[0],
         scale="free"
     )
-    data_name = log_folder / "learned_manifold.png"
-    logger.log_data(fig, data_name)
-    data_path = logger.log_dir / data_name
-    artifact.add_file(
-        data_path,
-        data_name
-    )
+    logger.log_data(fig, log_folder / "learned_manifold.png")
 
+    ys_vis = sample_many(vae_params, ys_key, xs[:10,0], config["vis_m"])
+    # Disp samples
+    fig = task_vis.visualize(
+        xs[0, 0, 0],
+        ys_vis[0],
+        base_manifold=base_p,
+        target_manifold=target_p,
+        learned_manifold=y2_fn,
+        #labels=gt_labels[0],
+        scale="free"
+    )
+    logger.log_data(fig, log_folder / "improved_disp_samples.png")
 
     # Step 3: Improve VAE
 
@@ -740,13 +710,7 @@ for iter in range(num_iter):
 
         print(f"[{step+1}/{align_epochs}] loss = {loss_val:.4f}")
 
-    data_name = log_folder / "improved_vae_params.npz"
-    logger.log_data(vae_params, data_name)
-    data_path = logger.log_dir / data_name
-    artifact.add_file(
-        data_path,
-        data_name
-    )
+    logger.log_data(vae_params, log_folder / "improved_vae_params.flax")
 
     # Plot loss
     loss_fig = plt.figure(figsize=(5, 3), dpi=200)
@@ -788,37 +752,10 @@ for iter in range(num_iter):
     plt.tight_layout()
     plt.show()
 
-    data_name = log_folder / "vae_alignement_loss.png"
-    logger.log_data(loss_fig, data_name)
-    data_path = logger.log_dir / data_name
-    artifact.add_file(
-        data_path,
-        data_name
-    )
-
-    data_name = log_folder / "align_u.png"
-    logger.log_data(u_fig, data_name)
-    data_path = logger.log_dir / data_name
-    artifact.add_file(
-        data_path,
-        data_name
-    )
-
-    data_name = log_folder / "align_d_kl.png"
-    logger.log_data(d_kl_fig, data_name)
-    data_path = logger.log_dir / data_name
-    artifact.add_file(
-        data_path,
-        data_name
-    )
-
-    data_name = log_folder / "align_disp.png"
-    logger.log_data(disp_fig, data_name)
-    data_path = logger.log_dir / data_name
-    artifact.add_file(
-        data_path,
-        data_name
-    )
+    logger.log_data(loss_fig, log_folder / "vae_alignement_loss.png")
+    logger.log_data(u_fig, log_folder / "align_u.png")
+    logger.log_data(d_kl_fig, log_folder / "align_d_kl.png")
+    logger.log_data(disp_fig, log_folder / "align_disp.png")
 
     (
         key,
@@ -861,13 +798,7 @@ for iter in range(num_iter):
         scale="free"
     )
 
-    data_name = log_folder / "aligned_samples.png"
-    logger.log_data(fig, data_name)
-    data_path = logger.log_dir / data_name
-    artifact.add_file(
-        data_path,
-        name=data_name
-    )
+    logger.log_data(fig, log_folder / "aligned_samples.png")
 
 # %% Retrieve VAE from from data
 
@@ -895,13 +826,7 @@ for step in range(pre_train_epochs):
         })
     print(f"[{step+1}/{pre_train_epochs}] -ELBO = {loss_val}")
 
-data_name = Path("final") / "vae_params.npz"
-logger.log_data(vae_params, data_name)
-data_path = logger.log_dir / data_name
-artifact.add_file(
-    data_path,
-    name=data_name
-)
+logger.log_data(vae_params, Path("final") / "vae_params.flax")
 
 # Plot loss
 fig = plt.figure(figsize=(5, 3), dpi=200)
@@ -912,13 +837,7 @@ plt.title("VAE training loss")
 plt.grid(True)
 plt.tight_layout()
 plt.show()
-data_name = Path("final") / "elbo.png"
-logger.log_data(fig, data_name)
-data_path = logger.log_dir / data_name
-artifact.add_file(
-    data_path,
-    name=data_name
-)
+logger.log_data(fig, Path("final") / "elbo.png")
 
 ys = sample_many(vae_params, ys_key, xs[:,0], m)
 
@@ -940,13 +859,13 @@ fig = task_vis.visualize(
     #labels=labels[0],
     scale="free"
 )
+logger.log_data(fig, Path("final") / "disp_samples.png")
 
-data_name = Path("final") / "disp_samples.png"
-logger.log_data(fig, data_name)
-data_path = logger.log_dir / data_name
-artifact.add_file(
-    data_path,
-    name=data_name
+var = disp(
+    vae_params,
+    xs[:,0],
+    ys_key,
+    n_z=config["disp_samples"]
 )
 
 mean_u = jnp.mean(u)
@@ -977,13 +896,7 @@ fig = task_vis.visualize(
     labels=labels[0],
     scale="free"
 )
-data_name = Path("final") / "samples.png"
-logger.log_data(fig, data_name)
-data_path = logger.log_dir / data_name
-artifact.add_file(
-    data_path,
-    name=data_name
-)
+logger.log_data(fig, Path("final") / "samples.png")
 
 # %% Plot ground truth utility
 fig = plt.figure(figsize=(5, 3), dpi=200)
@@ -994,13 +907,7 @@ plt.title("Utility vs iteration")
 plt.grid(True)
 plt.tight_layout()
 plt.show()
-data_name = "gt_u_vs_iter.png"
-logger.log_data(fig, data_name)
-data_path = logger.log_dir / data_name
-artifact.add_file(
-    data_path,
-    name=data_name
-)
+logger.log_data(fig, "gt_u_vs_iter.png")
 
 # %% Print stuff
 
@@ -1008,8 +915,10 @@ print("gt_u_history = ", gt_u_history)
 
 if wandb_flag:
     wandb.log({
-        "delta_gt_u" : gt_u_history[-1] - gt_u_history[0]
+        "delta_gt_u" : gt_u_history[-1] - gt_u_history[0],
+        "final_variance": float(var),
+        "variance": float(var)
     })
 
 if wandb_flag:
-    wandb.log_artifact(artifact)
+    logger.upload_artifact()

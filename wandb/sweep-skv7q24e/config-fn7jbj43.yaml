@@ -1,0 +1,10 @@
+wandb_version: 1
+
+gamma:
+  value: 1
+target_manifold:
+  value:
+    alpha: 1
+    beta: 1
+    gamma: -0.5
+    name: baseline
