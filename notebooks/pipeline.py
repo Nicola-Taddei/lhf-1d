@@ -15,8 +15,8 @@ import wandb
 
 from lhf import *
 
-path = Path("../configs/config.yaml")
-#path = Path("configs/config.yaml")
+#path = Path("../configs/config.yaml")
+path = Path("configs/config.yaml")
 with path.open("r") as f:
     config = yaml.safe_load(f)
 
@@ -724,7 +724,6 @@ for iter in range(num_iter):
         if wandb_flag:
             wandb.log(
                 {
-                    "align_step" :  step,
                     f"iter_{iter}/align_loss" : loss_val,
                     f"iter_{iter}/u_hat" : u_val,
                     f"iter_{iter}/kl" : kl_val,

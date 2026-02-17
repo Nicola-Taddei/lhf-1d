@@ -18,3 +18,8 @@ Install ```lhf``` package in editable mode: from root
 ```bash
 pip install -e .
 ```
+
+With ```conda```:
+```bash
+conda activate lhf
+```

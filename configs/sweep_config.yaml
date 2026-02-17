@@ -29,7 +29,7 @@ parameters:
      - max-var
      - none
 
-  pre_train_features:
+  pref_model_features:
     values:
       - [256,256]
       - [64,64]

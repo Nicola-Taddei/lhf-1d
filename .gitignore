@@ -1,2 +1,8 @@
 # Virtual environment
 /venv/
+
+# Sweep agent logs
+agent_*.log
+
+# Wandb runs/logs
+/wandb/
