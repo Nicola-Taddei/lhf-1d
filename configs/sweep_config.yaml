@@ -28,3 +28,10 @@ parameters:
      - var-target
      - max-var
      - none
+
+  pre_train_features:
+    values:
+      - [256,256]
+      - [64,64]
+      - [32,32]
+  

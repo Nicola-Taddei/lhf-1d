@@ -15,8 +15,8 @@ import wandb
 
 from lhf import *
 
-#path = Path("../configs/config.yaml")
-path = Path("configs/config.yaml")
+path = Path("../configs/config.yaml")
+#path = Path("configs/config.yaml")
 with path.open("r") as f:
     config = yaml.safe_load(f)
 
@@ -383,6 +383,9 @@ vmapped_vae_sample = jax.vmap(
     out_axes=1
 )
 
+global_step = 0
+
+
 # %% Training loop: Iterations
 
 for iter in range(num_iter):
@@ -420,9 +423,13 @@ for iter in range(num_iter):
             vae_params_best = vae_params
 
         if wandb_flag:
-            wandb.log({
-                f"iter_{iter}/elbo" : -loss_val
-            })
+            wandb.log(
+                {
+                    f"iter_{iter}/elbo" : -loss_val
+                },
+                step=global_step
+            )
+            global_step += 1
         print(f"[{step+1}/{pre_train_epochs}] -ELBO = {loss_val}")
 
     vae_params = vae_params_best
@@ -451,9 +458,12 @@ for iter in range(num_iter):
     )
 
     if wandb_flag:
-        wandb.log({
-            "variance": float(var)
-        })
+        wandb.log(
+            {
+                "variance": float(var)
+            },
+            step=global_step
+        )
 
     logits = logpdf_labels(
         xs,
@@ -502,6 +512,13 @@ for iter in range(num_iter):
 
     mean_u = jnp.mean(u)
     gt_u_history.append(float(mean_u))
+    if wandb_flag:
+        wandb.log(
+            {
+                "gt_u": float(mean_u)
+            },
+            step=global_step
+        )
 
     fig = task_vis.visualize(
         xs[0, 0, 0],
@@ -548,9 +565,13 @@ for iter in range(num_iter):
         loss_history.append(loss_val)
 
         if wandb_flag:
-            wandb.log({
-                f"iter_{iter}/nll" : loss_val
-            })
+            wandb.log(
+                {
+                    f"iter_{iter}/nll" : loss_val
+                },
+                step=global_step
+            )
+            global_step += 1
         print(f"[{step+1}/{pref_train_epochs}] NLL = {loss_val:.4f}")
 
     logger.log_data(pref_params, log_folder / "pref_params.flax")
@@ -701,12 +722,17 @@ for iter in range(num_iter):
         disp_history.append(disp_val)
 
         if wandb_flag:
-            wandb.log({
-                f"iter_{iter}/align_loss" : loss_val,
-                f"iter_{iter}/u_hat" : u_val,
-                f"iter_{iter}/kl" : kl_val,
-                f"iter_{iter}/disp" : disp_val,
-            })
+            wandb.log(
+                {
+                    "align_step" :  step,
+                    f"iter_{iter}/align_loss" : loss_val,
+                    f"iter_{iter}/u_hat" : u_val,
+                    f"iter_{iter}/kl" : kl_val,
+                    f"iter_{iter}/disp" : disp_val,
+                },
+                step=global_step
+            )
+            global_step += 1
 
         print(f"[{step+1}/{align_epochs}] loss = {loss_val:.4f}")
 
@@ -821,9 +847,13 @@ for step in range(pre_train_epochs):
     loss_history.append(loss_val)
 
     if wandb_flag:
-        wandb.log({
-            f"final/elbo" : -loss_val,
-        })
+        wandb.log(
+            {
+                f"final/elbo" : -loss_val,
+            },
+            step=global_step
+        )
+        global_step += 1
     print(f"[{step+1}/{pre_train_epochs}] -ELBO = {loss_val}")
 
 logger.log_data(vae_params, Path("final") / "vae_params.flax")
@@ -870,6 +900,13 @@ var = disp(
 
 mean_u = jnp.mean(u)
 gt_u_history.append(float(mean_u))
+if wandb_flag:
+    wandb.log(
+        {
+            "gt_u": float(mean_u)
+        },
+        step=global_step
+    )
 
 logits = logpdf_labels(
     xs,
@@ -914,11 +951,14 @@ logger.log_data(fig, "gt_u_vs_iter.png")
 print("gt_u_history = ", gt_u_history)
 
 if wandb_flag:
-    wandb.log({
-        "delta_gt_u" : gt_u_history[-1] - gt_u_history[0],
-        "final_variance": float(var),
-        "variance": float(var)
-    })
+    wandb.log(
+        {
+            "delta_gt_u" : gt_u_history[-1] - gt_u_history[0],
+            "final_variance": float(var),
+            "variance": float(var)
+        },
+        step=global_step
+    )
 
 if wandb_flag:
     logger.upload_artifact()

@@ -19,7 +19,7 @@ m: 20 #10
 vis_m: 1000
 tau: 1.0
 
-num_iter: 1 #10
+num_iter: 20
 
 clip_norm: 5.0
 

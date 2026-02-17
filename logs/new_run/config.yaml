@@ -1,15 +1,15 @@
 use_wandb: true
-interactive: true
+interactive: false
 run_name: null
 seed: 42
 base_manifold:
   alpha: 0.3
   beta: 0.2
-  gamma: 1
+  gamma: 0
 target_manifold:
-  gamma: -1
-  alpha: 0.5
-  beta: 0.5
+  alpha: 0.7
+  beta: 0.1
+  gamma: 0
 n_queries: 256
 n_internal: 10000
 m: 20
