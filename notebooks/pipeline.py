@@ -37,9 +37,10 @@ if wandb_flag:
     )
     config = dict(wandb.config)
 
+    log_dir = Path("../logs") / run.id
     logger = WandbLogger(
         run,
-        "../logs/new_run",
+        str(log_dir),
         config,
         "data",
         "data"
