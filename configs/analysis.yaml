@@ -1,7 +1,7 @@
 wandb:
-  project: lhf-alignment
+  project: lhf-1d #lhf-alignment
   artifact_name: data
-  artifact_version: latest
+  artifact_version: v91 #v85 #latest
   artifact_type: data
 
 analysis:

@@ -1,0 +1,6 @@
+{"time":"2026-02-26T15:01:58.762786668+01:00","level":"INFO","msg":"stream: starting","core version":"0.24.2"}
+{"time":"2026-02-26T15:01:59.005711571+01:00","level":"INFO","msg":"stream: created new stream","id":"s5zrokeo"}
+{"time":"2026-02-26T15:01:59.005758279+01:00","level":"INFO","msg":"handler: started","stream_id":"s5zrokeo"}
+{"time":"2026-02-26T15:01:59.005863556+01:00","level":"INFO","msg":"stream: started","id":"s5zrokeo"}
+{"time":"2026-02-26T15:01:59.005906954+01:00","level":"INFO","msg":"writer: started","stream_id":"s5zrokeo"}
+{"time":"2026-02-26T15:01:59.005924611+01:00","level":"INFO","msg":"sender: started","stream_id":"s5zrokeo"}

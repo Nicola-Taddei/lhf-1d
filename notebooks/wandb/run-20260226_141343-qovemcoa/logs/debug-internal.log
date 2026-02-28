@@ -1,0 +1,6 @@
+{"time":"2026-02-26T14:13:43.834170562+01:00","level":"INFO","msg":"stream: starting","core version":"0.24.2"}
+{"time":"2026-02-26T14:13:44.093338538+01:00","level":"INFO","msg":"stream: created new stream","id":"qovemcoa"}
+{"time":"2026-02-26T14:13:44.093509696+01:00","level":"INFO","msg":"handler: started","stream_id":"qovemcoa"}
+{"time":"2026-02-26T14:13:44.093684868+01:00","level":"INFO","msg":"stream: started","id":"qovemcoa"}
+{"time":"2026-02-26T14:13:44.093751301+01:00","level":"INFO","msg":"writer: started","stream_id":"qovemcoa"}
+{"time":"2026-02-26T14:13:44.093794112+01:00","level":"INFO","msg":"sender: started","stream_id":"qovemcoa"}

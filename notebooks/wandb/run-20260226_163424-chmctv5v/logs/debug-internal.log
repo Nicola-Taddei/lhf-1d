@@ -1,0 +1,6 @@
+{"time":"2026-02-26T16:34:24.988357554+01:00","level":"INFO","msg":"stream: starting","core version":"0.24.2"}
+{"time":"2026-02-26T16:34:25.255314781+01:00","level":"INFO","msg":"stream: created new stream","id":"chmctv5v"}
+{"time":"2026-02-26T16:34:25.255445269+01:00","level":"INFO","msg":"handler: started","stream_id":"chmctv5v"}
+{"time":"2026-02-26T16:34:25.255766021+01:00","level":"INFO","msg":"stream: started","id":"chmctv5v"}
+{"time":"2026-02-26T16:34:25.255838051+01:00","level":"INFO","msg":"writer: started","stream_id":"chmctv5v"}
+{"time":"2026-02-26T16:34:25.255872381+01:00","level":"INFO","msg":"sender: started","stream_id":"chmctv5v"}

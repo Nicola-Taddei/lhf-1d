@@ -1,0 +1,6 @@
+{"time":"2026-02-26T16:15:59.514404282+01:00","level":"INFO","msg":"stream: starting","core version":"0.24.2"}
+{"time":"2026-02-26T16:15:59.793228794+01:00","level":"INFO","msg":"stream: created new stream","id":"vcl2pawu"}
+{"time":"2026-02-26T16:15:59.793393425+01:00","level":"INFO","msg":"handler: started","stream_id":"vcl2pawu"}
+{"time":"2026-02-26T16:15:59.793841945+01:00","level":"INFO","msg":"stream: started","id":"vcl2pawu"}
+{"time":"2026-02-26T16:15:59.793914604+01:00","level":"INFO","msg":"writer: started","stream_id":"vcl2pawu"}
+{"time":"2026-02-26T16:15:59.793943934+01:00","level":"INFO","msg":"sender: started","stream_id":"vcl2pawu"}

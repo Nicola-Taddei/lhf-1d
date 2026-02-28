@@ -31,7 +31,6 @@ VIS_M = analysis_params["vis_m"]
 seed = analysis_params["seed"]
 
 # %%
-# %%
 run = wandb.init(
     project=PROJECT,
     job_type="analysis",
@@ -49,6 +48,41 @@ with open(artifact_dir / "config.yaml", "r") as f:
     config = yaml.safe_load(f)
 
 print(config)
+
+# %% Plot tau
+import re
+from jax.nn import softplus
+
+# Collect all iteration folders
+iter_dirs = sorted(
+    [p for p in artifact_dir.iterdir() if p.is_dir() and p.name.startswith("iter_")],
+    key=lambda p: int(re.findall(r"\d+", p.name)[0])
+)
+
+iterations = []
+taus = []
+
+for iter_path in iter_dirs:
+    iter_idx = int(re.findall(r"\d+", iter_path.name)[0])
+
+    pref_params_iter = load_flax_pytree(iter_path / "pref_params.flax")
+
+    logtau = pref_params_iter["log_tau"]
+    tau = softplus(logtau)
+
+    iterations.append(iter_idx)
+    taus.append(float(tau))
+
+print("Collected tau values for", len(iterations), "iterations")
+
+# %%
+plt.figure()
+plt.plot(iterations, taus)
+plt.xlabel("Iteration")
+plt.ylabel("Tau (softplus(logtau))")
+plt.title("Temperature Parameter Evolution")
+plt.grid(True)
+plt.show()
 
 # %%
 iter_folder = artifact_dir / f"iter_{ITERATION}"

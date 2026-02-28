@@ -15,8 +15,8 @@ import wandb
 
 from lhf import *
 
-#path = Path("../configs/config.yaml")
-path = Path("configs/config.yaml")
+path = Path("../configs/config.yaml")
+#path = Path("configs/config.yaml")
 with path.open("r") as f:
     config = yaml.safe_load(f)
 
@@ -30,16 +30,17 @@ wandb_flag = config.get("use_wandb", False)
 
 if wandb_flag:
     run = wandb.init(
-        project="lhf-alignment",
+        project="traj-alignment",
         name=config.get("run_name", None),
         config=config,
-        mode="online",          # oppure "offline"
+        mode="online",  # "offline"
     )
     config = dict(wandb.config)
 
+    log_dir = Path("../logs") / run.id
     logger = WandbLogger(
         run,
-        "../logs/new_run",
+        str(log_dir),
         config,
         "data",
         "data"
@@ -52,26 +53,17 @@ else:
 
 key = jax.random.PRNGKey(config["seed"])
 
-# %% Task
-base_p = TaskParams(
-    alpha = config["base_manifold"]["alpha"],
-    beta = config["base_manifold"]["beta"],
-    gamma = config["base_manifold"]["gamma"]
-)
-
-target_p = TaskParams(
-    alpha = config["target_manifold"]["alpha"],
-    beta = config["target_manifold"]["beta"],
-    gamma = config["target_manifold"]["gamma"]
-)
-
-task_vis = ManifoldVisualizer(ylim=(-1,5))
-
+# %% Visualizer
+vis = TrajectoryVisualizer()
 
 # %% Create data
+N = config["N"]
+T = config["T"]
+scale = config["scale"]
+v_eps = config["v_eps"]
+lengthscale = config["lengthscale"]
 n_queries = config["n_queries"]
 n_internal = config["n_internal"]
-m = config["m"]
 tau = config["tau"]
 
 (
@@ -81,36 +73,27 @@ tau = config["tau"]
     l_key
 ) = jax.random.split(key, 4)
 
-x = jax.random.uniform(x_key, shape=(n_internal,1), minval=-1, maxval=1)
-xs = jnp.broadcast_to(
-    x[:,None,:],
-    (n_internal, m, 1)
-)   # (B,m,1)
+traj = procedural_traj(
+    y_key,
+    N,
+    T,
+    n_internal,
+    scale=scale,
+    v_eps=v_eps,
+    lengthscale=lengthscale
+)
+x_0, ys_traj, x_T = traj[:,:,0,:], traj[:,:,1:-1,:], traj[:,:,-1,:]
+xs = to_x_cond(x_0, x_T)
+ys = to_y_out(ys_traj)
 
 logger.log_data(np.array(xs), "xs.npy")
+logger.log_data(np.array(ys), "ys.npy")
 
-vmapped_sample_manifold = jax.vmap(
-    sample_manifold,
-    in_axes=(0,1,None,None,None),
-    out_axes=1
-)
-y_keys = jax.random.split(y_key, (m,))
-ys = vmapped_sample_manifold(
-    y_keys,
-    xs,
-    base_p.alpha,
-    base_p.beta,
-    base_p.gamma,
-)   # (B,m,2)
-
-gt_logits = logpdf_labels(
-    xs,
-    ys,
-    alpha=target_p.alpha,
-    beta=target_p.beta,
-    gamma=target_p.gamma,
+gt_logits = logpdf_labels_traj(
+    traj,
     tau=tau
 )
+
 # Sample labels
 gt_labels = jax.random.categorical(
     l_key,
@@ -118,14 +101,12 @@ gt_labels = jax.random.categorical(
     axis=-1
 )
 
-fig = task_vis.visualize(
-    xs[0,0,0],
-    ys[0],
-    base_manifold=base_p,
-    target_manifold=target_p,
-    labels=gt_labels[0]
-)
-logger.log_data(fig, Path("base") / "vis.png")
+for i in range(10):
+    fig = vis.visualize(
+        traj[i],
+        labels=gt_labels[i]
+    )
+    logger.log_data(fig, Path("base") / f"samples_{i}.png")
 
 
 # %% Training loop: Initialization
@@ -134,11 +115,8 @@ num_iter = config["num_iter"]
 
 # Logging:
 gt_u_history = []
-y_history = []
-ys_tot = None
-x_tot = None
-l_tot = None
-l_history = []
+traj_buffer = None
+labels_buffer = None
 
 # Step 1: Pre-training
 pre_train_epochs = config["pre_train_epochs"]
@@ -159,11 +137,12 @@ sigma_y_T = config["sigma_y_T"]
 pre_train_features = config["pre_train_features"]
 pre_train_n_features = len(pre_train_features)
 d_z=config["d_z"]
-d_y=config["d_y"]
+d_y= N * (T-2) * 2
 
 encoder_mlp = MLP(
     features=pre_train_features,
-    output_dim=d_z + (d_z*(d_z+1)) // 2,
+    #output_dim=d_z + (d_z*(d_z+1)) // 2,
+    output_dim=2*d_z,
     kernel_inits=[jax.nn.initializers.normal(1e-2)] * pre_train_n_features,
     bias_inits=[jax.nn.initializers.zeros] * pre_train_n_features
 )
@@ -180,13 +159,14 @@ gen_model = ConditionalVAE(
     d_z=d_z,
     d_y=d_y
 )
-x_batch = xs[:pre_train_batch_dim,0]  # (B,1)
-y_batch = ys[:pre_train_batch_dim,0]  # (B,2)
+x_batch = xs[:pre_train_batch_dim]  # (B,d_x)
+y_batch = ys[:pre_train_batch_dim]  # (B,d_y)
 
 xz_batch = jnp.concatenate(
-    [x_batch, jnp.zeros((pre_train_batch_dim,1))],
+    [x_batch, jnp.zeros((pre_train_batch_dim, d_z))],
     axis=-1
 )
+
 xy_batch = jnp.concatenate(
     [x_batch, y_batch],
     axis=-1
@@ -216,19 +196,6 @@ def pre_train_step(params, step, opt_state, key, x, y):
     params = optax.apply_updates(params, updates)
     return params, opt_state, loss
 
-def sample_many(params, key, x, m):
-    keys = jax.random.split(key, m)
-    return jax.vmap(
-        lambda k: gen_model.sample(
-            params,
-            x,                     # (B, 1)
-            k,
-            sigma_y=sigma_y_T,
-            deterministic=False,
-        ),
-        out_axes=1,
-    )(keys)
-
 # Step 2: Learn preference model
 pref_lr = config["pref_lr"]
 pref_batch_dim = config["pref_batch_dim"]
@@ -241,41 +208,61 @@ pref_train_epochs = config["pref_train_epochs"]
     gt_l_key
 ) = jax.random.split(key, 4)
 
-mlp = MLP(
-    features=config["pref_model_features"],
-    output_dim=1
+w = config["w"]
+traj_utility_model = TrajectoryAttentionCNN(
+    pre_conv_channels=[w, w, w],
+    pre_conv_kernel=config["pre_conv_kernel"],
+
+    # Agent attention block parameters
+    num_agent_attn_layers=config["num_agent_attn_layers"],
+    num_heads=config["num_heads"],
+    attn_hidden_dim=w,
+    attn_mlp_dim=w,
+    attn_out_dim=w,
+
+    # Temporal convolutions after pooling
+    post_conv_channels=[w, w],
+    post_conv_kernel=config["post_conv_kernel"],
 )
 
-init_batch = jnp.zeros((pref_batch_dim, m, 2))
-pref_params = {
-    "y2_fn": mlp.init(init_key, init_batch),
-}
+learned_traj_utility = lambda params, traj: traj_utility_model.apply(params, traj)
+
+traj_batch = jnp.zeros((pref_batch_dim, N, T, 2))
+u_params = traj_utility_model.init(init_key, traj_batch)
+
+if config["learning_tau"]:
+    pref_params = {
+        "u_params": u_params,
+        "log_tau": jnp.array(1.0)
+    }
+else:
+    pref_params = {
+        "u_params": u_params,
+    }
+
 logger.log_data(pref_params, "base/pref_params.flax")
 
-y2_learned = lambda p, x, y1: mlp.apply(p, jnp.concatenate([x,y1], axis=2))
-
 pref_model = PrefModel(
-    y2_fn = y2_learned
+    utility_fn=learned_traj_utility
 )
 
-def pref_nll(params, x, y, labels):
-    logpdf = pref_model.logpdf(params, x, y, tau=tau)      # (B, m, 2)
+def pref_nll(params, traj, labels):
+    logpdf = pref_model.logpdf(params, traj, tau=tau)      # (B, T, 2)
 
     # Gather log-probabilities of the observed labels
     logp = jnp.take_along_axis(
         logpdf,
-        labels[..., None],     # (B, m, 1)
+        labels[..., None],     # (B, T, 1)
         axis=-1,
-    )[..., 0]                  # (B, m)
+    )[..., 0]                  # (B, T)
 
     return -jnp.mean(logp)
 
 @jax.jit
-def pref_train_step(params, opt_state, x, y, labels):
+def pref_train_step(params, opt_state, traj, labels):
     loss, grads = jax.value_and_grad(pref_nll)(
         params,
-        x,
-        y,
+        traj,
         labels,
     )
     updates, opt_state = opt.update(grads, opt_state)
@@ -288,19 +275,22 @@ align_batch_dim = config["align_batch_dim"]
 align_epochs = config["align_epochs"]
 beta = config["beta"]
 
-def avg_u(params, key, y2_params, x, sigma_y):
-    y = gen_model.sample(
+def avg_u(params, key, u_params, x, sigma_y):
+    y_out = gen_model.sample(
         params,
         x,
         key,
         sigma_y=sigma_y,
         deterministic=False
-    )      # (B, m, 2)
+    )      # (B, N*(T-2)*2)
 
-    y1 = y[:, None, 0][...,None]
-    y2 = y[:, None, 1][...,None]
-    y2_hat = y2_learned(y2_params, x[:, None, :], y1)
-    u = -(y2 - y2_hat)**2
+    y = from_y_out(y_out, N, T)
+
+    x_0, x_T = from_x_cond(x, N)
+
+    traj = assemble_traj(x_0, y, x_T)
+
+    u = learned_traj_utility(u_params, traj)
 
     return jnp.mean(u)
 
@@ -325,11 +315,11 @@ def disp(params, x, key, n_z=8):
     return jnp.mean(d)
 
 @jax.jit
-def align_loss(params, base_vae_params, y2_params, key, x, sigma_y):
+def align_loss(params, base_vae_params, u_params, key, x, sigma_y):
     u_bar = avg_u(
         params,
         key, 
-        y2_params,
+        u_params,
         x,
         sigma_y
     )
@@ -364,11 +354,11 @@ def align_loss(params, base_vae_params, y2_params, key, x, sigma_y):
     return loss
 
 @jax.jit
-def align_train_step(params, base_vae_params, y2_params, opt_state, key, x, sigma_y):
+def align_train_step(params, base_vae_params, u_params, opt_state, key, x, sigma_y):
     loss, grads = jax.value_and_grad(align_loss)(
         params,
         base_vae_params,
-        y2_params,
+        u_params,
         key,
         x,
         sigma_y
@@ -376,12 +366,6 @@ def align_train_step(params, base_vae_params, y2_params, opt_state, key, x, sigm
     updates, opt_state = opt.update(grads, opt_state)
     params = optax.apply_updates(params, updates)
     return params, opt_state, loss
-
-vmapped_vae_sample = jax.vmap(
-    gen_model.sample,
-    in_axes=(None, 1, 0),
-    out_axes=1
-)
 
 global_step = 0
 
@@ -391,7 +375,6 @@ global_step = 0
 for iter in range(num_iter):
     log_folder = Path(f"iter_{iter}")
     # Step 1: Pre-training
-    #opt = optax.adam(pre_train_lr)
     opt = optax.chain(
         optax.clip_by_global_norm(clip_norm),
         optax.adam(pre_train_lr),
@@ -404,16 +387,17 @@ for iter in range(num_iter):
         vae_params_best,
         0,
         subkey,
-        xs[:,0],
-        jax.lax.stop_gradient(ys[:,0])
+        xs,
+        jax.lax.stop_gradient(ys)
     ))
 
     loss_history = []
 
     for step in range(pre_train_epochs):
         key, subkey = jax.random.split(key)
+        # TODO: We are not using batches anymore. Decide what to do
         vae_params, opt_state, loss = pre_train_step(
-            vae_params, step, opt_state, subkey, xs[:,0], jax.lax.stop_gradient(ys[:,0])
+            vae_params, step, opt_state, subkey, xs, jax.lax.stop_gradient(ys)
         )
         loss_val = float(loss)          # convert from JAX scalar
         loss_history.append(loss_val)
@@ -446,13 +430,48 @@ for iter in range(num_iter):
     plt.show()
     logger.log_data(fig, log_folder / "vae_pre_training_loss.png")
 
-    ys = sample_many(vae_params, ys_key, xs[:,0], m)
-    ys_query = ys[:n_queries]
-    y_history.append(ys_query)   # ys for queries
+    ys = gen_model.sample(
+        vae_params,
+        xs,
+        ys_key
+    )
+    traj = assemble_traj(
+        x_0,
+        from_y_out(ys, N, T),
+        x_T
+    )
+    # TODO: Improve query selection method: random, acquisition function, ...
+    traj_query = traj[:n_queries]
+
+    gt_logits = logpdf_labels_traj(
+        traj,
+        tau=tau,
+    )
+    gt_labels = jax.random.categorical(
+        l_key,
+        gt_logits,
+        axis=-1,
+    )
+    # TODO: Replicate here the query selection process
+    # used for trajectories (if it changes)
+    ls = gt_labels[:n_queries]
+
+    if traj_buffer is None:
+        traj_buffer = traj_query
+        labels_buffer = ls
+    else:
+        traj_buffer = jnp.concatenate(
+            [traj_buffer, traj_query],
+            axis=0
+        )
+        labels_buffer = jnp.concatenate(
+            [labels_buffer, ls],
+            axis=0
+        )
 
     var = disp(
         vae_params,
-        xs[:,0],
+        xs,
         ys_key,
         n_z=config["disp_samples"]
     )
@@ -465,50 +484,14 @@ for iter in range(num_iter):
             step=global_step
         )
 
-    logits = logpdf_labels(
-        xs,
-        ys,
-        alpha=target_p.alpha,
-        beta=target_p.beta,
-        gamma=target_p.gamma,
-        tau=tau,
-    )
-    gt_labels = jax.random.categorical(
-        l_key,
-        logits,
-        axis=-1,
-    )
-    ls = gt_labels[:n_queries]
-    l_history.append(ls)   # labels used for queries
+    u = trajectory_utility(traj)
 
-    if ys_tot is None:
-        ys_tot = ys_query
-        l_tot = ls
-        xs_tot = xs[:n_queries]
-    else:
-        ys_tot = jnp.concatenate([ys_tot, ys_query], axis=0)
-        l_tot = jnp.concatenate([l_tot, ls], axis=0)
-        xs_tot = jnp.concatenate([xs_tot, xs[:n_queries]], axis=0)
-
-    ys_vis = sample_many(vae_params, ys_key, xs[:10,0], config["vis_m"])
-
-    u = utility_vmapped(
-        xs,
-        ys,
-        target_p.alpha,
-        target_p.beta,
-        target_p.gamma,
-    )
-
-    fig = task_vis.visualize(
-        xs[0, 0, 0],
-        ys_vis[0],
-        base_manifold=base_p,
-        target_manifold=target_p,
-        #labels=gt_labels[0],
-        scale="free"
-    )
-    logger.log_data(fig, log_folder / "pre_trained_disp_samples.png")
+    for i in range(10):
+        fig = vis.visualize(
+            traj[i],
+            scale="free"
+        )
+        logger.log_data(fig, log_folder / f"pre_trained_samples_{i}.png")
 
     mean_u = jnp.mean(u)
     gt_u_history.append(float(mean_u))
@@ -520,19 +503,8 @@ for iter in range(num_iter):
             step=global_step
         )
 
-    fig = task_vis.visualize(
-        xs[0, 0, 0],
-        ys[0],
-        base_manifold=base_p,
-        target_manifold=target_p,
-        labels=gt_labels[0],
-        scale="free"
-    )
-    logger.log_data(fig, log_folder / "pre_trained_samples.png")
-
 
     # Step 2: Learn preference model
-    #opt = optax.adam(pref_lr)
     opt = optax.chain(
         optax.clip_by_global_norm(clip_norm),
         optax.adam(pref_lr),
@@ -541,7 +513,7 @@ for iter in range(num_iter):
 
     loss_history = []
 
-    n_tot = xs_tot.shape[0]
+    n_tot = traj_buffer.shape[0]
     for step in range(pref_train_epochs):
         key, subkey = jax.random.split(key)
         idx = jax.random.randint(
@@ -550,15 +522,13 @@ for iter in range(num_iter):
             minval=0,
             maxval=n_tot
         )
-        xs_batch = xs_tot[idx]
-        ys_batch = ys_tot[idx]
-        l_batch = l_tot[idx]
+        traj_batch = traj_buffer[idx]
+        l_batch = labels_buffer[idx]
         pref_params, opt_state, loss = pref_train_step(
             pref_params,
             opt_state,
-            xs_batch,        # (pref_batch_dim, m, 1)
-            ys_batch,        # (pref_batch_dim, m, 2)
-            l_batch,   # (pref_batch_dim, m)
+            traj_batch,        # (pref_batch_dim, N, T, 2)
+            l_batch,   # (pref_batch_dim, T)
         )
 
         loss_val = float(loss)
@@ -589,8 +559,7 @@ for iter in range(num_iter):
 
     pred_logits = pref_model.logpdf(
         pref_params,
-        xs,
-        ys,
+        traj,
         tau=tau
     )
 
@@ -600,12 +569,8 @@ for iter in range(num_iter):
         axis=-1,
     )
 
-    gt_logits = logpdf_labels(
-        xs,
-        ys,
-        alpha=target_p.alpha,
-        beta=target_p.beta,
-        gamma=target_p.gamma,
+    gt_logits = logpdf_labels_traj(
+        traj,
         tau=tau,
     )
 
@@ -624,48 +589,9 @@ for iter in range(num_iter):
 
     print(f"ACC(learned vs GT):   {acc_learned} / {acc_gt}")
 
-    #y2_fn = lambda x, y: y2_learned(pref_params["y2_fn"], x, y) / (jax.nn.softplus(pref_params["log_tau"]) + 1e-6)
-    y2_fn = lambda x, y: y2_learned(pref_params["y2_fn"], x, y)
-
-    fig = task_vis.visualize(
-        xs[0, 0, 0],
-        ys[0],
-        base_manifold=base_p,
-        target_manifold=target_p,
-        learned_manifold=y2_fn,
-        labels=gt_labels[0],
-        scale="free"
-    )
-    logger.log_data(fig, log_folder / "learned_manifold.png")
-
-    ys_vis = sample_many(vae_params, ys_key, xs[:10,0], config["vis_m"])
-    # Disp samples
-    fig = task_vis.visualize(
-        xs[0, 0, 0],
-        ys_vis[0],
-        base_manifold=base_p,
-        target_manifold=target_p,
-        learned_manifold=y2_fn,
-        #labels=gt_labels[0],
-        scale="free"
-    )
-    logger.log_data(fig, log_folder / "improved_disp_samples.png")
-
     # Step 3: Improve VAE
-
     base_vae_params = jax.lax.stop_gradient(vae_params)
 
-    #y2_fn = lambda x, y: y2_learned(pref_params["y2_fn"], x, y) / (jax.nn.softplus(pref_params["log_tau"]) + 1e-6)
-    y2_fn = lambda x, y: y2_learned(pref_params["y2_fn"], x, y)
-    """ y2_fn = lambda x, y1: manifold(
-        x,
-        y1,
-        target_p.alpha,
-        target_p.beta,
-        target_p.gamma,
-    ) """
-
-    #opt = optax.adam(align_lr)
     opt = optax.chain(
         optax.clip_by_global_norm(clip_norm),
         optax.adam(align_lr),
@@ -679,13 +605,14 @@ for iter in range(num_iter):
 
     for step in range(align_epochs):
         key, subkey = jax.random.split(key, 2)
+        # TODO: Again, we are using the whole dataset instead of minibatches
         vae_params, opt_state, loss = align_train_step(
             vae_params,
             base_vae_params,
-            pref_params["y2_fn"],
+            pref_params["u_params"],
             opt_state,
             subkey,
-            xs[:,0],        # (B, 1)
+            xs,        # (B, N*2*2)
             sigma_y_T
         )
 
@@ -694,8 +621,8 @@ for iter in range(num_iter):
             avg_u(
                 vae_params,
                 key,
-                pref_params["y2_fn"],
-                xs[:,0],
+                pref_params["u_params"],
+                xs,
                 sigma_y_T
             )
         )
@@ -704,14 +631,14 @@ for iter in range(num_iter):
                 vae_params,
                 base_vae_params,
                 key,
-                xs[:,0],
+                xs,
                 sigma_y_T
             )
         )
         disp_val = float(
             disp(
                 vae_params,
-                xs[:,0],
+                xs,
                 key,
                 n_z=config["disp_samples"]
             )
@@ -789,19 +716,21 @@ for iter in range(num_iter):
         gt_l_key
     ) = jax.random.split(key, 4)
 
-    ys = vmapped_vae_sample(
+    ys = gen_model.sample(
         vae_params,
         xs,
-        jax.random.split(y_key, (m,))
+        y_key
     )
 
-    gt_logits = logpdf_labels(
-        xs,
-        ys,
-        alpha=target_p.alpha,
-        beta=target_p.beta,
-        gamma=target_p.gamma,
-        tau=tau,
+    traj = assemble_traj(
+        x_0,
+        from_y_out(ys, N, T),
+        x_T
+    )
+
+    gt_logits = logpdf_labels_traj(
+        traj,
+        tau=tau
     )
 
     gt_new_labels = jax.random.categorical(
@@ -810,25 +739,18 @@ for iter in range(num_iter):
         axis=-1,
     )
 
-    #y2_fn = lambda x, y: y2_learned(pref_params["y2_fn"], x, y) / (jax.nn.softplus(pref_params["log_tau"]) + 1e-6)
-    y2_fn = lambda x, y: y2_learned(pref_params["y2_fn"], x, y)
+    for i in range(10):
+        fig = vis.visualize(
+            traj[i],
+            labels=gt_new_labels[i],
+            scale="free"
+        )
 
-    fig = task_vis.visualize(
-        xs[0, 0, 0],
-        ys[0],
-        base_manifold=base_p,
-        target_manifold=target_p,
-        learned_manifold=y2_fn,
-        labels=gt_new_labels[0],
-        scale="free"
-    )
+    logger.log_data(fig, log_folder / f"aligned_samples_{i}.png")
 
-    logger.log_data(fig, log_folder / "aligned_samples.png")
-
-# %% Retrieve VAE from from data
+# %% Retrieve VAE from data
 
 # Step 1: Pre-training
-#opt = optax.adam(pre_train_lr)
 opt = optax.chain(
     optax.clip_by_global_norm(clip_norm),
     optax.adam(pre_train_lr),
@@ -840,7 +762,7 @@ loss_history = []
 for step in range(pre_train_epochs):
     key, subkey = jax.random.split(key)
     vae_params, opt_state, loss = pre_train_step(
-        vae_params, step, opt_state, subkey, xs[:,0], ys[:,0]
+        vae_params, step, opt_state, subkey, xs, ys
     )
     loss_val = float(loss)          # convert from JAX scalar
     loss_history.append(loss_val)
@@ -868,31 +790,23 @@ plt.tight_layout()
 plt.show()
 logger.log_data(fig, Path("final") / "elbo.png")
 
-ys = sample_many(vae_params, ys_key, xs[:,0], m)
-
-ys_vis = sample_many(vae_params, ys_key, xs[:10,0], config["vis_m"])
-
-u = utility_vmapped(
+ys = gen_model.sample(
+    vae_params,
     xs,
-    ys,
-    target_p.alpha,
-    target_p.beta,
-    target_p.gamma,
+    y_key
 )
 
-fig = task_vis.visualize(
-    xs[0, 0, 0],
-    ys_vis[0],
-    base_manifold=base_p,
-    target_manifold=target_p,
-    #labels=labels[0],
-    scale="free"
+traj = assemble_traj(
+    x_0,
+    from_y_out(ys, N, T),
+    x_T
 )
-logger.log_data(fig, Path("final") / "disp_samples.png")
+
+u = trajectory_utility(traj)
 
 var = disp(
     vae_params,
-    xs[:,0],
+    xs,
     ys_key,
     n_z=config["disp_samples"]
 )
@@ -907,32 +821,24 @@ if wandb_flag:
         step=global_step
     )
 
-logits = logpdf_labels(
-    xs,
-    ys,
-    alpha=target_p.alpha,
-    beta=target_p.beta,
-    gamma=target_p.gamma,
-    tau=tau,
+gt_logits = logpdf_labels_traj(
+    traj,
+    tau,
 )
 
-labels = jax.random.categorical(
+gt_labels = jax.random.categorical(
     l_key,
-    logits,
+    gt_logits,
     axis=-1,
 )
 
-l_history.append(labels)   # labels used for queries
-
-fig = task_vis.visualize(
-    xs[0, 0, 0],
-    ys[0],
-    base_manifold=base_p,
-    target_manifold=target_p,
-    labels=labels[0],
-    scale="free"
-)
-logger.log_data(fig, Path("final") / "samples.png")
+for i in range(10):
+    fig = vis.visualize(
+        traj[i],
+        labels=gt_labels[i],
+        scale="free"
+    )
+    logger.log_data(fig, Path("final") / f"samples_{i}.png")
 
 # %% Plot ground truth utility
 fig = plt.figure(figsize=(5, 3), dpi=200)

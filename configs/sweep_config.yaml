@@ -6,32 +6,15 @@ command:
   - notebooks/pipeline.py
 
 parameters:
-  target_manifold:
+  tau:
     values:
-      - name: close
-        alpha: 0.5
-        beta: 0.5
-        gamma: 0.0
+      - 0.01
+      - 0.05
+      - 0.1
 
-      - name: neutral
-        alpha: 1.0
-        beta: 0.5
-        gamma: 0.0
-
-      - name: far
-        alpha: 0.7
-        beta: 0.1
-        gamma: 0.0
-
-  creativity-incentive:
+  N:
     values:
-     - var-target
-     - max-var
-     - none
-
-  pref_model_features:
-    values:
-      - [256,256]
-      - [64,64]
-      - [32,32]
+      - 2
+      - 3
+      - 5
   

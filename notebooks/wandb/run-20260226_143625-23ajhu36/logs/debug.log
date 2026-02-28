@@ -1,0 +1,8 @@
+2026-02-26 14:36:25,592 INFO    MainThread:11053 [wandb_init.py:setup_run_log_directory():717] Logging user logs to /home/nicola/repos/lhf-1d/notebooks/wandb/run-20260226_143625-23ajhu36/logs/debug.log
+2026-02-26 14:36:25,593 INFO    MainThread:11053 [wandb_init.py:setup_run_log_directory():718] Logging internal logs to /home/nicola/repos/lhf-1d/notebooks/wandb/run-20260226_143625-23ajhu36/logs/debug-internal.log
+2026-02-26 14:36:25,593 INFO    MainThread:11053 [wandb_init.py:monkeypatch_ipython():636] configuring jupyter hooks <wandb.sdk.wandb_init._WandbInit object at 0x7942795218e0>
+2026-02-26 14:36:25,593 INFO    MainThread:11053 [wandb_init.py:init():844] calling init triggers
+2026-02-26 14:36:25,593 INFO    MainThread:11053 [wandb_init.py:init():849] wandb.init called with sweep_config: {}
+config: {'use_wandb': True, 'interactive': True, 'run_name': None, 'seed': 42, 'N': 3, 'T': 10, 'v_eps': 0.5, 'n_queries': 256, 'n_internal': 10000, 'm': 20, 'vis_m': 1000, 'tau': 1.0, 'num_iter': 2, 'clip_norm': 5.0, 'pre_train_epochs': 2, 'pre_train_lr': 0.001, 'pre_train_batch_dim': 256, 'sigma_y_0': 1.5, 'sigma_y_T': 0.3, 'pre_train_features': [256, 256], 'd_z': 4, 'pref_lr': 0.001, 'pref_batch_dim': 256, 'pref_train_epochs': 2, 'learning_tau': False, 'w': 32, 'pre_conv_kernel': 3, 'num_agent_attn_layers': 1, 'num_heads': 1, 'post_conv_kernel': 3, 'align_lr': 0.001, 'align_batch_dim': 256, 'align_epochs': 2, 'beta': 0.01, 'creativity-incentive': 'var-target', 'disp_samples': 10, 'gamma': 5.0, 'var-target': 5.0, '_wandb': {}}
+2026-02-26 14:36:25,593 INFO    MainThread:11053 [wandb_init.py:init():892] starting backend
+2026-02-26 14:36:25,594 INFO    MainThread:11053 [wandb_init.py:init():895] sending inform_init request

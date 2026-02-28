@@ -1,0 +1,6 @@
+{"time":"2026-02-26T14:46:10.959963097+01:00","level":"INFO","msg":"stream: starting","core version":"0.24.2"}
+{"time":"2026-02-26T14:46:11.223574779+01:00","level":"INFO","msg":"stream: created new stream","id":"67vxarvm"}
+{"time":"2026-02-26T14:46:11.223828424+01:00","level":"INFO","msg":"handler: started","stream_id":"67vxarvm"}
+{"time":"2026-02-26T14:46:11.224071989+01:00","level":"INFO","msg":"stream: started","id":"67vxarvm"}
+{"time":"2026-02-26T14:46:11.22418674+01:00","level":"INFO","msg":"sender: started","stream_id":"67vxarvm"}
+{"time":"2026-02-26T14:46:11.224186746+01:00","level":"INFO","msg":"writer: started","stream_id":"67vxarvm"}

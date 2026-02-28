@@ -1,0 +1,132 @@
+_wandb:
+    value:
+        cli_version: 0.24.2
+        e:
+            vwxqps2q8key5neum8fs52pjoq3gsvba:
+                codePath: /home/nicola/repos/lhf-1d/notebooks/pipeline.py
+                codePathLocal: pipeline.py
+                cpu_count: 6
+                cpu_count_logical: 12
+                cudaVersion: "13.0"
+                disk:
+                    /:
+                        total: "982240026624"
+                        used: "96316239872"
+                email: nicola.taddei01@gmail.com
+                executable: /home/nicola/repos/lhf-1d/venv/bin/python
+                git:
+                    commit: 2bdb4060cd79d21f19dc9c58531ac82b41c16476
+                    remote: git@github.com:Nicola-Taddei/lhf-1d.git
+                gpu: NVIDIA GeForce GTX 1650 Ti
+                gpu_count: 1
+                gpu_nvidia:
+                    - architecture: Turing
+                      cudaCores: 1024
+                      memoryTotal: "4294967296"
+                      name: NVIDIA GeForce GTX 1650 Ti
+                      uuid: GPU-c16d0bf3-a59f-0208-0e17-fce7c6c4cf1b
+                host: nicola-XPS-15-9500
+                memory:
+                    total: "16501473280"
+                os: Linux-6.14.0-36-generic-x86_64-with-glibc2.39
+                program: /home/nicola/repos/lhf-1d/notebooks/pipeline.py
+                python: CPython 3.12.3
+                root: /home/nicola/repos/lhf-1d/notebooks
+                startedAt: "2026-02-26T13:35:39.951863Z"
+                writerId: vwxqps2q8key5neum8fs52pjoq3gsvba
+        m: []
+        python_version: 3.12.3
+        t:
+            "1":
+                - 12
+                - 45
+            "2":
+                - 12
+                - 45
+            "3":
+                - 2
+                - 16
+            "4": 3.12.3
+            "5": 0.24.2
+            "8":
+                - 1
+            "12": 0.24.2
+            "13": linux-x86_64
+"N":
+    value: 3
+T:
+    value: 10
+align_batch_dim:
+    value: 256
+align_epochs:
+    value: 2
+align_lr:
+    value: 0.001
+beta:
+    value: 0.01
+clip_norm:
+    value: 5
+creativity-incentive:
+    value: var-target
+d_z:
+    value: 4
+disp_samples:
+    value: 10
+gamma:
+    value: 5
+interactive:
+    value: true
+learning_tau:
+    value: false
+m:
+    value: 20
+n_internal:
+    value: 10000
+n_queries:
+    value: 256
+num_agent_attn_layers:
+    value: 1
+num_heads:
+    value: 1
+num_iter:
+    value: 2
+post_conv_kernel:
+    value: 3
+pre_conv_kernel:
+    value: 3
+pre_train_batch_dim:
+    value: 256
+pre_train_epochs:
+    value: 2
+pre_train_features:
+    value:
+        - 256
+        - 256
+pre_train_lr:
+    value: 0.001
+pref_batch_dim:
+    value: 256
+pref_lr:
+    value: 0.001
+pref_train_epochs:
+    value: 2
+run_name:
+    value: null
+seed:
+    value: 42
+sigma_y_0:
+    value: 1.5
+sigma_y_T:
+    value: 0.3
+tau:
+    value: 1
+use_wandb:
+    value: true
+v_eps:
+    value: 0.5
+var-target:
+    value: 5
+vis_m:
+    value: 1000
+w:
+    value: 32

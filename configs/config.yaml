@@ -1,54 +1,54 @@
 use_wandb: true
 #use_wandb: false
-interactive: false #true
+interactive: true
 run_name: null
 seed: 42
 
-base_manifold:
-  alpha: 0.3
-  beta: 0.2
-  gamma: 0.0
-target_manifold:
-  alpha: 0.7 #0.5
-  beta: 0.1 #0.5
-  gamma: 0.0 #-1.0
+N: 2
+T: 10
+scale: 3.0
+v_eps: 5.0
+lengthscale: 5.0
 
-n_queries: 256 # 64
+n_queries: 1000
 n_internal: 10000
 m: 20 #10
 vis_m: 1000
-tau: 1.0
+tau: 0.05 #1.0
 
-num_iter: 20
+num_iter: 10 #30
 
 clip_norm: 5.0
 
-pre_train_epochs: 4000 #2000
+pre_train_epochs: 4000
 pre_train_lr: 1.0e-3
-pre_train_batch_dim: 256
+pre_train_batch_dim: 10000
 sigma_y_0: 1.5
-sigma_y_T: 0.1 #0.05
+sigma_y_T: 0.3 #0.05
 
 pre_train_features:
   - 256
   - 256
-d_z: 1
-d_y: 2
+d_z: 4
 
 pref_lr: 1.0e-3
-pref_batch_dim: 256
-pref_train_epochs: 2000 #1000
+pref_batch_dim: 1000
+pref_train_epochs: 2000
 
-pref_model_features:
-  - 256
-  - 256
+learning_tau: false
+
+w: 32
+pre_conv_kernel: 3
+num_agent_attn_layers: 1
+num_heads: 1
+post_conv_kernel: 3
 
 align_lr: 1.0e-3
-align_batch_dim: 256
+align_batch_dim: 10000
 align_epochs: 1000
-beta: 0.01 #0.001
+beta: 0.01
 
-creativity-incentive: var-target # max-var, none, var-target
+creativity-incentive: none # max-var, none, var-target
 disp_samples: 10
 gamma: 5.0 #15.0
 var-target: 5.0

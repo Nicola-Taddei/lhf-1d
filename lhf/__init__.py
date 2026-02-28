@@ -1,11 +1,14 @@
 from .task import (
-    TaskParams,
-    manifold,
-    sample_manifold,
-    utility,
-    utility_vmapped,
-    logpdf_labels,
-    ManifoldVisualizer
+    to_x_cond,
+    from_x_cond,
+    to_y_out,
+    from_y_out,
+    assemble_traj,
+    sample_context,
+    procedural_traj,
+    trajectory_utility,
+    logpdf_labels_traj,
+    TrajectoryVisualizer
 )
 
 from .vae import(
@@ -14,6 +17,7 @@ from .vae import(
 )
 
 from .preferences import(
+    TrajectoryAttentionCNN,
     PrefModel
 )
 

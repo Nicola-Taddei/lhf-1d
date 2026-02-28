@@ -1,0 +1,17 @@
+{
+  "os": "Linux-6.14.0-36-generic-x86_64-with-glibc2.39",
+  "python": "CPython 3.12.3",
+  "startedAt": "2026-02-26T13:36:21.865404Z",
+  "program": "/home/nicola/repos/lhf-1d/notebooks/pipeline.py",
+  "codePath": "/home/nicola/repos/lhf-1d/notebooks/pipeline.py",
+  "codePathLocal": "pipeline.py",
+  "git": {
+    "remote": "git@github.com:Nicola-Taddei/lhf-1d.git",
+    "commit": "2bdb4060cd79d21f19dc9c58531ac82b41c16476"
+  },
+  "email": "nicola.taddei01@gmail.com",
+  "root": "/home/nicola/repos/lhf-1d/notebooks",
+  "host": "nicola-XPS-15-9500",
+  "executable": "/home/nicola/repos/lhf-1d/venv/bin/python",
+  "writerId": "nhldamtl17ummy8248skxl908jxlw58r"
+}
