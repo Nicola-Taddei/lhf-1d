@@ -1,0 +1,44 @@
+use_wandb: true
+interactive: false
+run_name: null
+seed: 42
+base_manifold:
+  alpha: 0.3
+  beta: 0.2
+  gamma: 0
+target_manifold:
+  alpha: 0.7
+  beta: 0.1
+  gamma: 0
+n_queries: 256
+n_internal: 10000
+m: 20
+vis_m: 1000
+tau: 1
+num_iter: 1
+clip_norm: 5
+pre_train_epochs: 10
+pre_train_lr: 0.001
+pre_train_batch_dim: 256
+sigma_y_0: 1.5
+sigma_y_T: 0.1
+pre_train_features:
+- 256
+- 256
+d_z: 1
+d_y: 2
+pref_lr: 0.001
+pref_batch_dim: 256
+pref_train_epochs: 2000
+pref_model_features:
+- 256
+- 256
+learning_tau: true
+align_lr: 0.001
+align_batch_dim: 256
+align_epochs: 1000
+beta: 0.01
+creativity-incentive: var-target
+disp_samples: 10
+gamma: 5
+var-target: 5

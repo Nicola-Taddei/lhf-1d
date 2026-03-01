@@ -1,0 +1,21 @@
+2026-02-28 16:28:49,922 INFO    MainThread:1426284 [wandb_setup.py:_flush():81] Current SDK version is 0.25.0
+2026-02-28 16:28:49,922 INFO    MainThread:1426284 [wandb_setup.py:_flush():81] Configure stats pid to 1426284
+2026-02-28 16:28:49,922 INFO    MainThread:1426284 [wandb_setup.py:_flush():81] Loading settings from environment variables
+2026-02-28 16:28:49,922 INFO    MainThread:1426284 [wandb_init.py:setup_run_log_directory():717] Logging user logs to /home/ntaddei/lhf-1d/notebooks/wandb/run-20260228_162849-12rtgdrk/logs/debug.log
+2026-02-28 16:28:49,922 INFO    MainThread:1426284 [wandb_init.py:setup_run_log_directory():718] Logging internal logs to /home/ntaddei/lhf-1d/notebooks/wandb/run-20260228_162849-12rtgdrk/logs/debug-internal.log
+2026-02-28 16:28:49,922 INFO    MainThread:1426284 [wandb_init.py:init():844] calling init triggers
+2026-02-28 16:28:49,922 INFO    MainThread:1426284 [wandb_init.py:init():849] wandb.init called with sweep_config: {}
+config: {'use_wandb': True, 'interactive': False, 'run_name': None, 'seed': 42, 'N': 2, 'T': 10, 'scale': 3.0, 'v_eps': 5.0, 'lengthscale': 5.0, 'n_queries': 1000, 'n_internal': 10000, 'm': 20, 'vis_m': 1000, 'tau': 0.05, 'num_iter': 30, 'clip_norm': 5.0, 'pre_train_epochs': 4000, 'pre_train_lr': 0.001, 'pre_train_batch_dim': 10000, 'sigma_y_0': 1.5, 'sigma_y_T': 0.3, 'pre_train_features': [256, 256], 'd_z': 4, 'pref_lr': 0.001, 'pref_batch_dim': 1000, 'pref_train_epochs': 2000, 'learning_tau': False, 'w': 32, 'pre_conv_kernel': 3, 'num_agent_attn_layers': 1, 'num_heads': 1, 'post_conv_kernel': 3, 'align_lr': 0.001, 'align_batch_dim': 10000, 'align_epochs': 1000, 'beta': 0.01, 'creativity-incentive': 'none', 'disp_samples': 10, 'gamma': 5.0, 'var-target': 5.0, '_wandb': {}}
+2026-02-28 16:28:49,922 INFO    MainThread:1426284 [wandb_init.py:init():892] starting backend
+2026-02-28 16:28:50,132 INFO    MainThread:1426284 [wandb_init.py:init():895] sending inform_init request
+2026-02-28 16:28:50,135 INFO    MainThread:1426284 [wandb_init.py:init():903] backend started and connected
+2026-02-28 16:28:50,136 INFO    MainThread:1426284 [wandb_init.py:init():973] updated telemetry
+2026-02-28 16:28:50,139 INFO    MainThread:1426284 [wandb_init.py:init():997] communicating run to backend with 90.0 second timeout
+2026-02-28 16:28:51,067 INFO    MainThread:1426284 [wandb_init.py:init():1042] starting run threads in backend
+2026-02-28 16:28:51,100 INFO    MainThread:1426284 [wandb_run.py:_console_start():2524] atexit reg
+2026-02-28 16:28:51,100 INFO    MainThread:1426284 [wandb_run.py:_redirect():2373] redirect: wrap_raw
+2026-02-28 16:28:51,100 INFO    MainThread:1426284 [wandb_run.py:_redirect():2442] Wrapping output streams.
+2026-02-28 16:28:51,100 INFO    MainThread:1426284 [wandb_run.py:_redirect():2465] Redirects installed.
+2026-02-28 16:28:51,102 INFO    MainThread:1426284 [wandb_init.py:init():1082] run started, returning control to user process
+2026-02-28 16:28:53,427 INFO    wandb-AsyncioManager-main:1426284 [service_client.py:_forward_responses():134] Reached EOF.
+2026-02-28 16:28:53,427 INFO    wandb-AsyncioManager-main:1426284 [mailbox.py:close():155] Closing mailbox, abandoning 1 handles.

@@ -15,8 +15,8 @@ import wandb
 
 from lhf import *
 
-path = Path("../configs/config.yaml")
-#path = Path("configs/config.yaml")
+#path = Path("../configs/config.yaml")
+path = Path("configs/config.yaml")
 with path.open("r") as f:
     config = yaml.safe_load(f)
 
@@ -100,6 +100,15 @@ gt_labels = jax.random.categorical(
     gt_logits,
     axis=-1
 )
+
+has_nan = jnp.any(jnp.isnan(traj))
+has_inf = jnp.any(jnp.isinf(traj))
+has_nonfinite = jnp.any(~jnp.isfinite(traj))
+
+print("has_nan = ", has_nan)
+print("has_inf = ", has_inf)
+print("has_nonfinite = ", has_nonfinite)
+print("traj = ", traj)
 
 for i in range(10):
     fig = vis.visualize(
@@ -867,3 +876,6 @@ if wandb_flag:
 
 if wandb_flag:
     logger.upload_artifact()
+    wandb.finish()
+
+print("Run completed successfully")

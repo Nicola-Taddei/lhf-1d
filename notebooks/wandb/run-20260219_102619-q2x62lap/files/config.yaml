@@ -1,0 +1,145 @@
+_wandb:
+    value:
+        cli_version: 0.25.0
+        e:
+            l9kwonqvnau0bmbj28yavy6gubkm4szp:
+                codePath: notebooks/pipeline.py
+                codePathLocal: pipeline.py
+                cpu_count: 32
+                cpu_count_logical: 64
+                cudaVersion: "12.8"
+                disk:
+                    /:
+                        total: "3936290357248"
+                        used: "3077477859328"
+                email: nicola.taddei01@gmail.com
+                executable: /home/ntaddei/miniconda3/envs/lhf/bin/python3
+                git:
+                    commit: 29fb224a6031edc8a53feabc8bbcf47aa5bd138b
+                    remote: git@github.com:Nicola-Taddei/lhf-1d.git
+                gpu: NVIDIA GeForce RTX 4090
+                gpu_count: 4
+                gpu_nvidia:
+                    - architecture: Ada
+                      cudaCores: 16384
+                      memoryTotal: "25757220864"
+                      name: NVIDIA GeForce RTX 4090
+                      uuid: GPU-87e3b7f4-7b2d-69f9-ae56-40a718f78893
+                    - architecture: Ada
+                      cudaCores: 16384
+                      memoryTotal: "25757220864"
+                      name: NVIDIA GeForce RTX 4090
+                      uuid: GPU-45f9ee80-24ce-7486-838a-494ada7163b9
+                    - architecture: Ada
+                      cudaCores: 16384
+                      memoryTotal: "25757220864"
+                      name: NVIDIA GeForce RTX 4090
+                      uuid: GPU-0b2c9088-6c66-4abe-6c09-1d8547393a25
+                    - architecture: Ada
+                      cudaCores: 16384
+                      memoryTotal: "25757220864"
+                      name: NVIDIA GeForce RTX 4090
+                      uuid: GPU-6c5d974e-9c4b-dafb-74ed-a9fcc4f0b966
+                host: idsc-mifcom-1
+                memory:
+                    total: "810688974848"
+                os: Linux-6.8.0-94-generic-x86_64-with-glibc2.35
+                program: /home/ntaddei/lhf-1d/notebooks/pipeline.py
+                python: CPython 3.10.19
+                root: /home/ntaddei/lhf-1d/notebooks
+                startedAt: "2026-02-19T09:26:19.804772Z"
+                writerId: l9kwonqvnau0bmbj28yavy6gubkm4szp
+        m: []
+        python_version: 3.10.19
+        t:
+            "1":
+                - 12
+                - 45
+            "2":
+                - 12
+                - 45
+            "3":
+                - 16
+                - 61
+            "4": 3.10.19
+            "5": 0.25.0
+            "12": 0.25.0
+            "13": linux-x86_64
+align_batch_dim:
+    value: 256
+align_epochs:
+    value: 1000
+align_lr:
+    value: 0.001
+base_manifold:
+    value:
+        alpha: 0.3
+        beta: 0.2
+        gamma: 0
+beta:
+    value: 0.01
+clip_norm:
+    value: 5
+creativity-incentive:
+    value: var-target
+d_y:
+    value: 2
+d_z:
+    value: 1
+disp_samples:
+    value: 10
+gamma:
+    value: 5
+interactive:
+    value: false
+learning_tau:
+    value: true
+m:
+    value: 20
+n_internal:
+    value: 10000
+n_queries:
+    value: 256
+num_iter:
+    value: 1
+pre_train_batch_dim:
+    value: 256
+pre_train_epochs:
+    value: 10
+pre_train_features:
+    value:
+        - 256
+        - 256
+pre_train_lr:
+    value: 0.001
+pref_batch_dim:
+    value: 256
+pref_lr:
+    value: 0.001
+pref_model_features:
+    value:
+        - 256
+        - 256
+pref_train_epochs:
+    value: 2000
+run_name:
+    value: null
+seed:
+    value: 42
+sigma_y_0:
+    value: 1.5
+sigma_y_T:
+    value: 0.1
+target_manifold:
+    value:
+        alpha: 0.7
+        beta: 0.1
+        gamma: 0
+tau:
+    value: 1
+use_wandb:
+    value: true
+var-target:
+    value: 5
+vis_m:
+    value: 1000

@@ -347,7 +347,8 @@ def procedural_traj(
     t = jnp.arange(T)
     dt = t[:, None] - t[None, :]
     K = v_eps**2 * jnp.exp(-0.5 * (dt / lengthscale) ** 2)
-    K = K + 1e-6 * jnp.eye(T)
+    jitter = 1e-3
+    K = K + jitter * jnp.eye(T)
 
     # Partition indices
     idx_b = jnp.array([0, T - 1])

@@ -1,0 +1,25 @@
+ERROR:2026-02-28 16:31:11,800:jax._src.xla_bridge:444: Jax plugin configuration error: Exception when calling jax_plugins.xla_cuda12.initialize()
+Traceback (most recent call last):
+  File "/home/ntaddei/miniconda3/envs/lhf/lib/python3.10/site-packages/jax_plugins/xla_cuda12/__init__.py", line 197, in _version_check
+    version = get_version()
+RuntimeError: jaxlib/cuda/versions_helpers.cc:81: operation cusparseGetProperty(MAJOR_VERSION, &major) failed: The cuSPARSE library was not found.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/ntaddei/miniconda3/envs/lhf/lib/python3.10/site-packages/jax/_src/xla_bridge.py", line 442, in discover_pjrt_plugins
+    plugin_module.initialize()
+  File "/home/ntaddei/miniconda3/envs/lhf/lib/python3.10/site-packages/jax_plugins/xla_cuda12/__init__.py", line 324, in initialize
+    _check_cuda_versions(raise_on_first_error=True)
+  File "/home/ntaddei/miniconda3/envs/lhf/lib/python3.10/site-packages/jax_plugins/xla_cuda12/__init__.py", line 262, in _check_cuda_versions
+    _version_check("cuSPARSE", cuda_versions.cusparse_get_version,
+  File "/home/ntaddei/miniconda3/envs/lhf/lib/python3.10/site-packages/jax_plugins/xla_cuda12/__init__.py", line 201, in _version_check
+    raise RuntimeError(err_msg) from e
+RuntimeError: Unable to load cuSPARSE. Is it installed?
+WARNING:2026-02-28 16:31:11,809:jax._src.xla_bridge:794: An NVIDIA GPU may be present on this machine, but a CUDA-enabled jaxlib is not installed. Falling back to cpu.
+has_nan =  True
+has_inf =  False
+Traceback (most recent call last):
+  File "/home/ntaddei/lhf-1d/notebooks/pipeline.py", line 110, in <module>
+    print("has_nonfinite = ", has_nonfinte)
+NameError: name 'has_nonfinte' is not defined

@@ -1,6 +1,6 @@
 use_wandb: true
 #use_wandb: false
-interactive: true
+interactive: false #true
 run_name: null
 seed: 42
 
@@ -16,7 +16,7 @@ m: 20 #10
 vis_m: 1000
 tau: 0.05 #1.0
 
-num_iter: 10 #30
+num_iter: 30
 
 clip_norm: 5.0
 
