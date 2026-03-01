@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Callable
 
 import jax
 import jax.numpy as jnp
@@ -190,98 +191,6 @@ def sample_context(
 
     return x_0, x_T, new_key
 
-'''
-def procedural_traj(
-    key: jax.random.PRNGKey,
-    N: int,
-    T: int,
-    B: int | None = None,
-    v_eps: float = 0.05,
-):
-    """
-    Generate procedural trajectories via random polar velocity sampling.
-
-    Args:
-        key: JAX PRNGKey
-        N: number of agents
-        T: number of timesteps
-        B: optional batch size
-        v_eps: velocity magnitude
-
-    Returns:
-        trajectories:
-            if unbatched: (N, T, 2)
-            if batched:   (B, N, T, 2)
-
-        new_key
-    """
-
-    key_x0, key_theta, new_key = jax.random.split(key, 3)
-
-    # -------------------------------------------------
-    # Initial positions
-    # -------------------------------------------------
-    if B is None:
-        x0_shape = (N, 2)
-        theta_shape = (T - 1, N)
-    else:
-        x0_shape = (B, N, 2)
-        theta_shape = (B, T - 1, N)
-
-    x_0 = jax.random.uniform(
-        key_x0,
-        shape=x0_shape,
-        minval=-1.0,
-        maxval=1.0,
-    )
-
-    # -------------------------------------------------
-    # Sample random angles
-    # -------------------------------------------------
-    theta = jax.random.uniform(
-        key_theta,
-        shape=theta_shape,
-        minval=0.0,
-        maxval=2.0 * jnp.pi,
-    )
-
-    # -------------------------------------------------
-    # Convert polar to Cartesian velocities
-    # -------------------------------------------------
-    vx = v_eps * jnp.cos(theta)
-    vy = v_eps * jnp.sin(theta)
-
-    v = jnp.stack([vx, vy], axis=-1)  # (..., 2)
-
-    # -------------------------------------------------
-    # Integrate via cumulative sum
-    # -------------------------------------------------
-    if B is None:
-        # v: (T-1, N, 2)
-        # Need time dimension second for easier cumsum
-        v = jnp.transpose(v, (1, 0, 2))  # (N, T-1, 2)
-
-        increments = jnp.concatenate(
-            [jnp.zeros((N, 1, 2)), v],
-            axis=1,
-        )  # (N, T, 2)
-
-        traj = x_0[:, None, :] + jnp.cumsum(increments, axis=1)
-
-    else:
-        # v: (B, T-1, N)
-        v = jnp.transpose(v, (0, 2, 1, 3))  # (B, N, T-1, 2)
-
-        increments = jnp.concatenate(
-            [jnp.zeros((B, N, 1, 2)), v],
-            axis=2,
-        )  # (B, N, T, 2)
-
-        traj = x_0[:, :, None, :] + jnp.cumsum(increments, axis=2)
-
-    return traj
-'''
-
 def procedural_traj(
     key: jax.random.PRNGKey,
     N: int,
@@ -398,66 +307,7 @@ def procedural_traj(
 
     return traj
 
-'''
-def trajectory_utility(traj: jnp.ndarray) -> jnp.ndarray:
-    """
-    Compute time-wise utility:
-
-        U_t = - sum_i sum_j ||v_i - v_j||^2
-
-    Supports:
-        (N, T, 2)
-        (B, N, T, 2)
-
-    Returns:
-        (T,)        or
-        (B, T)
-    """
-
-    # -------------------------------------------------
-    # Ensure batched format
-    # -------------------------------------------------
-    is_unbatched = (traj.ndim == 3)
-
-    if is_unbatched:
-        traj = traj[None, ...]  # (1, N, T, 2)
-
-    B, N, T, _ = traj.shape
-
-    # -------------------------------------------------
-    # Compute velocities
-    # -------------------------------------------------
-    v = traj[:, :, 1:, :] - traj[:, :, :-1, :]  # (B, N, T-1, 2)
-
-    # -------------------------------------------------
-    # Efficient quadratic form:
-    # -2N sum_i ||v_i||^2 + 2 ||sum_i v_i||^2
-    # -------------------------------------------------
-    sum_sq = jnp.sum(jnp.sum(v ** 2, axis=-1), axis=1)  # (B, T-1)
-
-    sum_v = jnp.sum(v, axis=1)  # (B, T-1, 2)
-    norm_sum_v_sq = jnp.sum(sum_v ** 2, axis=-1)  # (B, T-1)
-
-    utility = -2.0 * N * sum_sq + 2.0 * norm_sum_v_sq  # (B, T-1)
-
-    # -------------------------------------------------
-    # Pad time 0
-    # -------------------------------------------------
-    utility = jnp.concatenate(
-        [jnp.zeros((B, 1), dtype=traj.dtype), utility],
-        axis=1,
-    )
-
-    # -------------------------------------------------
-    # Restore original shape
-    # -------------------------------------------------
-    if is_unbatched:
-        utility = utility.squeeze(0)
-
-    return utility
-'''
-
-def trajectory_utility(
+def u_flock(
     traj: jnp.ndarray,
     accel_weight: float = 0.1,
 ) -> jnp.ndarray:
@@ -536,7 +386,134 @@ def trajectory_utility(
 
     return utility
 
+def u_zigzag(
+    traj: jnp.ndarray,
+    maxval: float = 10.0,
+) -> jnp.ndarray:
+    """
+    Time-wise zigzag utility:
+
+        U_t = clip( avg_i ||a_i||^2 - avg_i ||v_i||^2 , maxval )
+
+    Supports:
+        (N, T, 2)
+        (B, N, T, 2)
+
+    Returns:
+        (T,)        or
+        (B, T)
+    """
+
+    is_unbatched = (traj.ndim == 3)
+
+    if is_unbatched:
+        traj = traj[None, ...]
+
+    B, N, T, _ = traj.shape
+
+    # -------------------------------------------------
+    # Velocities
+    # -------------------------------------------------
+    if T > 1:
+        v = traj[:, :, 1:, :] - traj[:, :, :-1, :]  # (B, N, T-1, 2)
+
+        avg_v_sq = (
+            jnp.sum(jnp.sum(v ** 2, axis=-1), axis=1) / N
+        )  # (B, T-1)
+    else:
+        avg_v_sq = jnp.zeros((B, 0), dtype=traj.dtype)
+
+    # -------------------------------------------------
+    # Accelerations
+    # -------------------------------------------------
+    if T > 2:
+        a = v[:, :, 1:, :] - v[:, :, :-1, :]  # (B, N, T-2, 2)
+
+        avg_a_sq = (
+            jnp.sum(jnp.sum(a ** 2, axis=-1), axis=1) / N
+        )  # (B, T-2)
+    else:
+        avg_a_sq = jnp.zeros((B, 0), dtype=traj.dtype)
+
+    # -------------------------------------------------
+    # Align time dimensions to T
+    # -------------------------------------------------
+    # v starts at t=1
+    vel_term = jnp.concatenate(
+        [jnp.zeros((B, 1), dtype=traj.dtype), avg_v_sq],
+        axis=1
+    )  # (B, T)
+
+    # a starts at t=2
+    accel_term = jnp.concatenate(
+        [
+            jnp.zeros((B, 2), dtype=traj.dtype),
+            avg_a_sq
+        ],
+        axis=1
+    )  # (B, T)
+
+    # -------------------------------------------------
+    # Zigzag cost
+    # -------------------------------------------------
+    utility = accel_term - vel_term
+
+    utility = jnp.clip(utility, a_min=None, a_max=maxval)
+
+    if is_unbatched:
+        utility = utility.squeeze(0)
+
+    return utility
+
+def u_close(
+    traj: jnp.ndarray,
+) -> jnp.ndarray:
+    """
+    Mean-normalized closeness utility:
+
+        U_t = - (1/N^2) sum_{i,j} ||x_i - x_j||^2
+
+    Supports:
+        (N, T, 2)
+        (B, N, T, 2)
+
+    Returns:
+        (T,)        or
+        (B, T)
+    """
+
+    is_unbatched = (traj.ndim == 3)
+
+    if is_unbatched:
+        traj = traj[None, ...]
+
+    B, N, T, _ = traj.shape
+
+    # -------------------------------------------------
+    # Efficient quadratic form over positions
+    # -------------------------------------------------
+
+    # ∑_i ||x_i||^2
+    sum_sq = jnp.sum(jnp.sum(traj ** 2, axis=-1), axis=1)  # (B, T)
+
+    # ||∑_i x_i||^2
+    sum_x = jnp.sum(traj, axis=1)  # (B, T, 2)
+    norm_sum_x_sq = jnp.sum(sum_x ** 2, axis=-1)  # (B, T)
+
+    mean_pairwise_sq = (
+        2.0 / N * sum_sq
+        - 2.0 / (N ** 2) * norm_sum_x_sq
+    )  # (B, T)
+
+    utility = -mean_pairwise_sq
+
+    if is_unbatched:
+        utility = utility.squeeze(0)
+
+    return utility
+
 def logpdf_labels_traj(
+    utility_fn: Callable[[jnp.array], jnp.array],
     traj: jnp.ndarray,
     tau: float,
 ):
@@ -572,7 +549,7 @@ def logpdf_labels_traj(
     # -------------------------------------------------
     # Compute utility
     # -------------------------------------------------
-    u = trajectory_utility(traj)  # (B, T)
+    u = utility_fn(traj)  # (B, T)
 
     # -------------------------------------------------
     # Center utility per trajectory

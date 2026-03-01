@@ -6,7 +6,9 @@ from .task import (
     assemble_traj,
     sample_context,
     procedural_traj,
-    trajectory_utility,
+    u_flock,
+    u_zigzag,
+    u_close,
     logpdf_labels_traj,
     TrajectoryVisualizer
 )

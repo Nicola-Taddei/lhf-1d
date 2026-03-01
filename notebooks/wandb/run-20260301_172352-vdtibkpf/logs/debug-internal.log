@@ -1,0 +1,12 @@
+{"time":"2026-03-01T17:23:52.340400827+01:00","level":"INFO","msg":"stream: starting","core version":"0.24.2"}
+{"time":"2026-03-01T17:23:52.612632385+01:00","level":"INFO","msg":"stream: created new stream","id":"vdtibkpf"}
+{"time":"2026-03-01T17:23:52.612745596+01:00","level":"INFO","msg":"handler: started","stream_id":"vdtibkpf"}
+{"time":"2026-03-01T17:23:52.612887356+01:00","level":"INFO","msg":"stream: started","id":"vdtibkpf"}
+{"time":"2026-03-01T17:23:52.612945836+01:00","level":"INFO","msg":"writer: started","stream_id":"vdtibkpf"}
+{"time":"2026-03-01T17:23:52.61295609+01:00","level":"INFO","msg":"sender: started","stream_id":"vdtibkpf"}
+{"time":"2026-03-01T17:24:46.699198596+01:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2026-03-01T17:24:46.913920483+01:00","level":"INFO","msg":"handler: operation stats","stats":{}}
+{"time":"2026-03-01T17:24:46.927158938+01:00","level":"INFO","msg":"stream: closing","id":"vdtibkpf"}
+{"time":"2026-03-01T17:24:46.927173755+01:00","level":"INFO","msg":"handler: closed","stream_id":"vdtibkpf"}
+{"time":"2026-03-01T17:24:46.92722653+01:00","level":"INFO","msg":"sender: closed","stream_id":"vdtibkpf"}
+{"time":"2026-03-01T17:24:46.92723939+01:00","level":"INFO","msg":"stream: closed","id":"vdtibkpf"}

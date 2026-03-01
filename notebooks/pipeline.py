@@ -15,8 +15,8 @@ import wandb
 
 from lhf import *
 
-#path = Path("../configs/config.yaml")
-path = Path("configs/config.yaml")
+path = Path("../configs/config.yaml")
+#path = Path("configs/config.yaml")
 with path.open("r") as f:
     config = yaml.safe_load(f)
 
@@ -64,6 +64,18 @@ v_eps = config["v_eps"]
 lengthscale = config["lengthscale"]
 n_queries = config["n_queries"]
 n_internal = config["n_internal"]
+
+utility_fn_list = {
+    "flock": u_flock,
+    "zigzag": u_zigzag,
+    "close": u_close,
+}
+u_type = config["u_type"]
+if u_type not in utility_fn_list.keys():
+    raise ValueError(f"{u_type} utility not implemented yet.")
+
+utility_fn = utility_fn_list[u_type]
+
 tau = config["tau"]
 
 (
@@ -90,6 +102,7 @@ logger.log_data(np.array(xs), "xs.npy")
 logger.log_data(np.array(ys), "ys.npy")
 
 gt_logits = logpdf_labels_traj(
+    utility_fn,
     traj,
     tau=tau
 )
@@ -453,6 +466,7 @@ for iter in range(num_iter):
     traj_query = traj[:n_queries]
 
     gt_logits = logpdf_labels_traj(
+        utility_fn,
         traj,
         tau=tau,
     )
@@ -493,7 +507,7 @@ for iter in range(num_iter):
             step=global_step
         )
 
-    u = trajectory_utility(traj)
+    u = utility_fn(traj)
 
     for i in range(10):
         fig = vis.visualize(
@@ -579,6 +593,7 @@ for iter in range(num_iter):
     )
 
     gt_logits = logpdf_labels_traj(
+        utility_fn,
         traj,
         tau=tau,
     )
@@ -738,6 +753,7 @@ for iter in range(num_iter):
     )
 
     gt_logits = logpdf_labels_traj(
+        utility_fn,
         traj,
         tau=tau
     )
@@ -811,7 +827,7 @@ traj = assemble_traj(
     x_T
 )
 
-u = trajectory_utility(traj)
+u = utility_fn(traj)
 
 var = disp(
     vae_params,
@@ -831,6 +847,7 @@ if wandb_flag:
     )
 
 gt_logits = logpdf_labels_traj(
+    utility_fn,
     traj,
     tau,
 )

@@ -1,0 +1,6 @@
+{"time":"2026-03-01T17:35:23.907705577+01:00","level":"INFO","msg":"stream: starting","core version":"0.24.2"}
+{"time":"2026-03-01T17:35:24.195854869+01:00","level":"INFO","msg":"stream: created new stream","id":"afg387n1"}
+{"time":"2026-03-01T17:35:24.195904041+01:00","level":"INFO","msg":"handler: started","stream_id":"afg387n1"}
+{"time":"2026-03-01T17:35:24.196003142+01:00","level":"INFO","msg":"stream: started","id":"afg387n1"}
+{"time":"2026-03-01T17:35:24.196023327+01:00","level":"INFO","msg":"sender: started","stream_id":"afg387n1"}
+{"time":"2026-03-01T17:35:24.196021789+01:00","level":"INFO","msg":"writer: started","stream_id":"afg387n1"}
